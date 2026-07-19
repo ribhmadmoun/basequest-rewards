@@ -1,7 +1,6 @@
 "use client";
 
-import { ConnectWallet } from "@coinbase/onchainkit/wallet";
-import { useState } from "react";
+import ConnectWalletButton from "@/components/ConnectWalletButton";
 import { useAccount, useDisconnect } from "wagmi";
 
 type WalletStatusCardProps = {
@@ -13,7 +12,7 @@ function shortenAddress(address: string) {
 }
 
 function getButtonClassName(isPrimary: boolean) {
-  return `w-full rounded-card border px-4 py-2.5 text-sm font-semibold transition-opacity sm:w-auto sm:min-w-[140px] ${
+  return `rounded-card border px-4 py-2.5 text-sm font-semibold transition-opacity ${
     isPrimary
       ? "border-glass-border bg-base-blue text-text-primary hover:opacity-90"
       : "border-glass-border bg-glass-bg text-text-secondary hover:opacity-90"
@@ -25,10 +24,8 @@ export default function WalletStatusCard({
 }: WalletStatusCardProps) {
   const { address, status } = useAccount();
   const { disconnect, isPending: isDisconnecting } = useDisconnect();
-  const [userConnecting, setUserConnecting] = useState(false);
 
   const isConnected = status === "connected";
-  const isConnecting = status === "connecting" || status === "reconnecting";
 
   return (
     <article className="rounded-card border border-glass-border bg-glass-bg p-5 shadow-lg shadow-black/10 backdrop-blur-xl sm:p-6">
@@ -67,31 +64,18 @@ export default function WalletStatusCard({
             type="button"
             disabled={isDisconnecting}
             onClick={() => disconnect()}
-            className={getButtonClassName(false)}
+            className={`${getButtonClassName(false)} w-full sm:w-auto sm:min-w-[140px]`}
           >
             {isDisconnecting ? "Disconnecting..." : "Disconnect"}
           </button>
         ) : (
-          <ConnectWallet
-            disconnectedLabel="Connect"
-            onConnect={() => onWalletConnected?.()}
-            render={({ onClick, isLoading }) => {
-              const isBusy = userConnecting && isLoading;
-
-              return (
-                <button
-                  type="button"
-                  disabled={isBusy || isConnecting}
-                  onClick={() => {
-                    setUserConnecting(true);
-                    onClick();
-                  }}
-                  className={getButtonClassName(!isBusy && !isConnecting)}
-                >
-                  {isBusy || isConnecting ? "Connecting..." : "Connect"}
-                </button>
-              );
-            }}
+          <ConnectWalletButton
+            connectLabel="Connect"
+            connectingLabel="Connecting..."
+            buttonClassName={getButtonClassName(true)}
+            disabledClassName={getButtonClassName(false)}
+            onWalletConnected={onWalletConnected}
+            className="w-full sm:w-auto sm:min-w-[140px]"
           />
         )}
       </div>
