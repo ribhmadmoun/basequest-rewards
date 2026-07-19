@@ -3,6 +3,19 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* BaseQuest design tokens */
+  --base-blue: #0052ff;
+  --gradient-from: #0052ff;
+  --gradient-via: #0047e0;
+  --gradient-to: #0039b3;
+  --glass-bg: rgb(255 255 255 / 10%);
+  --glass-border: rgb(255 255 255 / 20%);
+  --text-primary: #ffffff;
+  --text-secondary: rgb(255 255 255 / 90%);
+  --text-muted: rgb(255 255 255 / 75%);
+  --radius-card: 1rem;
+  --radius-badge: 9999px;
 }
 
 @theme inline {
@@ -10,6 +23,19 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* BaseQuest design tokens */
+  --color-base-blue: var(--base-blue);
+  --color-gradient-from: var(--gradient-from);
+  --color-gradient-via: var(--gradient-via);
+  --color-gradient-to: var(--gradient-to);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --radius-card: 1rem;
+  --radius-badge: 9999px;
 }
 
 @media (prefers-color-scheme: dark) {
