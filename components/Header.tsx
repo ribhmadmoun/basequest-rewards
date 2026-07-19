@@ -1,11 +1,21 @@
 export default function Header() {
   return (
-    <header className="sticky top-0 z-10 w-full px-4 pt-4 sm:px-6">
-      <div className="mx-auto flex max-w-3xl items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-4 py-3 shadow-lg backdrop-blur-md sm:px-6 sm:py-4">
-        <span className="text-lg font-bold tracking-tight text-white sm:text-xl">
-          BaseQuest Rewards
-        </span>
-        <span className="rounded-full bg-[#0052FF] px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
+    <header className="sticky top-0 z-10 w-full px-4 pt-5 pb-2 sm:px-6">
+      <div className="mx-auto flex max-w-lg items-center justify-between gap-4 rounded-card border border-glass-border bg-glass-bg px-5 py-3.5 shadow-lg shadow-black/10 backdrop-blur-xl sm:max-w-xl sm:px-6 sm:py-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div
+            aria-hidden
+            className="flex size-9 shrink-0 items-center justify-center rounded-card bg-base-blue shadow-md"
+          >
+            <span className="text-sm font-bold tracking-tight text-text-primary">
+              BQ
+            </span>
+          </div>
+          <span className="truncate font-sans text-base font-bold tracking-tight text-text-primary sm:text-lg">
+            BaseQuest Rewards
+          </span>
+        </div>
+        <span className="shrink-0 rounded-badge border border-glass-border bg-base-blue px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-text-primary shadow-sm">
           Base
         </span>
       </div>

@@ -1,0 +1,12 @@
+{
+  "miniapp": {
+    "version": "1",
+    "name": "BaseQuest Rewards",
+    "homeUrl": "http://localhost:3000",
+    "iconUrl": "http://localhost:3000/globe.svg",
+    "splashBackgroundColor": "#0052FF",
+    "subtitle": "Daily rewards on Base",
+    "description": "Daily rewards and engagement for the Base ecosystem.",
+    "primaryCategory": "finance"
+  }
+}
