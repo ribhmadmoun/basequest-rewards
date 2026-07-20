@@ -2,7 +2,7 @@
   "miniapp": {
     "version": "1",
     "name": "BaseQuest Rewards",
-    "homeUrl": "https://YOUR_PRODUCTION_DOMAIN",
+    "homeUrl": "https://basequest-rewards.vercel.app/",
     "iconUrl": "https://YOUR_PRODUCTION_DOMAIN/app-icon.png",
     "splashBackgroundColor": "#0052FF",
     "subtitle": "Daily rewards on Base",
