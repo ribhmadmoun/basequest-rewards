@@ -4,6 +4,7 @@ import ConnectWalletButton from "@/components/ConnectWalletButton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAccount, useDisconnect } from "wagmi";
 
 const NAV_ITEMS = [
@@ -46,17 +47,49 @@ function WalletMenu() {
   const { address } = useAccount();
   const { disconnect, isPending: isDisconnecting } = useDisconnect();
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<{
+    top: number;
+    right: number;
+  } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!isOpen) {
+      setMenuPosition(null);
       return;
     }
 
-    function handlePointerDown(event: MouseEvent) {
-      if (!menuRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
+    function updateMenuPosition() {
+      if (!containerRef.current) {
+        return;
       }
+
+      const rect = containerRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+
+    updateMenuPosition();
+
+    function handlePointerDown(event: MouseEvent) {
+      const target = event.target as Node;
+
+      if (
+        containerRef.current?.contains(target) ||
+        menuRef.current?.contains(target)
+      ) {
+        return;
+      }
+
+      setIsOpen(false);
     }
 
     function handleEscape(event: KeyboardEvent) {
@@ -65,10 +98,14 @@ function WalletMenu() {
       }
     }
 
+    window.addEventListener("resize", updateMenuPosition);
+    window.addEventListener("scroll", updateMenuPosition, true);
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleEscape);
 
     return () => {
+      window.removeEventListener("resize", updateMenuPosition);
+      window.removeEventListener("scroll", updateMenuPosition, true);
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleEscape);
     };
@@ -78,8 +115,49 @@ function WalletMenu() {
     return null;
   }
 
+  const dropdownMenu =
+    isOpen && menuPosition && mounted
+      ? createPortal(
+          <div
+            ref={menuRef}
+            role="menu"
+            style={{
+              position: "fixed",
+              top: menuPosition.top,
+              right: menuPosition.right,
+            }}
+            className="pointer-events-auto z-[9999] min-w-[11rem] overflow-hidden rounded-card border border-glass-border bg-glass-bg py-1 shadow-lg shadow-black/25 backdrop-blur-xl"
+          >
+            <Link
+              href="/profile"
+              role="menuitem"
+              onClick={() => setIsOpen(false)}
+              className="block px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-white/10"
+            >
+              Profile
+            </Link>
+            <button
+              type="button"
+              role="menuitem"
+              disabled={isDisconnecting}
+              onClick={() => {
+                disconnect();
+                setIsOpen(false);
+              }}
+              className="block w-full px-3 py-2 text-left text-sm font-medium text-text-secondary transition-colors hover:bg-white/10 hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isDisconnecting ? "Disconnecting..." : "Disconnect Wallet"}
+            </button>
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
-    <div className="relative max-w-[5.75rem] shrink-0 lg:max-w-none" ref={menuRef}>
+    <div
+      className="relative max-w-[5.75rem] shrink-0 lg:max-w-none"
+      ref={containerRef}
+    >
       <button
         type="button"
         aria-expanded={isOpen}
@@ -98,33 +176,7 @@ function WalletMenu() {
         </span>
       </button>
 
-      {isOpen ? (
-        <div
-          role="menu"
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-[11rem] overflow-hidden rounded-card border border-glass-border bg-glass-bg py-1 shadow-lg shadow-black/25 backdrop-blur-xl"
-        >
-          <Link
-            href="/profile"
-            role="menuitem"
-            onClick={() => setIsOpen(false)}
-            className="block px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-white/10"
-          >
-            Profile
-          </Link>
-          <button
-            type="button"
-            role="menuitem"
-            disabled={isDisconnecting}
-            onClick={() => {
-              disconnect();
-              setIsOpen(false);
-            }}
-            className="block w-full px-3 py-2 text-left text-sm font-medium text-text-secondary transition-colors hover:bg-white/10 hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isDisconnecting ? "Disconnecting..." : "Disconnect Wallet"}
-          </button>
-        </div>
-      ) : null}
+      {dropdownMenu}
     </div>
   );
 }
@@ -136,7 +188,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-10 w-full min-w-0 px-4 pt-5 pb-2 sm:px-6">
-      <div className="mx-auto flex w-full min-w-0 max-w-lg items-center gap-1.5 overflow-hidden rounded-card border border-glass-border bg-glass-bg px-2 py-2 shadow-lg shadow-black/10 backdrop-blur-xl sm:max-w-xl sm:gap-3 sm:px-5 sm:py-2.5 lg:grid lg:max-w-4xl lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-6 lg:overflow-visible lg:px-6 lg:py-3">
+      <div className="mx-auto flex w-full min-w-0 max-w-lg items-center gap-1.5 rounded-card border border-glass-border bg-glass-bg px-2 py-2 shadow-lg shadow-black/10 backdrop-blur-xl sm:max-w-xl sm:gap-3 sm:px-5 sm:py-2.5 lg:grid lg:max-w-4xl lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-6 lg:px-6 lg:py-3">
         <Link
           href="/"
           aria-label="Home"
