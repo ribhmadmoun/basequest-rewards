@@ -13,7 +13,6 @@ type QuestCardProps = {
   ctaLabel: string;
   questCompleted?: boolean;
   onAction?: () => void;
-  onWalletConnected?: () => void;
 };
 
 const statusLabels: Record<QuestStatus, string> = {
@@ -45,7 +44,6 @@ export default function QuestCard({
   ctaLabel,
   questCompleted = false,
   onAction,
-  onWalletConnected,
 }: QuestCardProps) {
   const isActionable = status === "available";
   const isConnectWalletQuest = questId === "connect-wallet";
@@ -76,7 +74,6 @@ export default function QuestCard({
           questCompleted={questCompleted}
           buttonClassName={getCtaButtonClassName(true)}
           disabledClassName={getCtaButtonClassName(false)}
-          onWalletConnected={onWalletConnected}
         />
       ) : (
         <button

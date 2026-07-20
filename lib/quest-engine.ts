@@ -4,6 +4,24 @@ export type QuestId =
   | "build-streak"
   | "explore-base";
 
+const QUEST_IDS: QuestId[] = [
+  "daily-check-in",
+  "connect-wallet",
+  "build-streak",
+  "explore-base",
+];
+
+export function parseQuestIds(ids: unknown): QuestId[] {
+  if (!Array.isArray(ids)) {
+    return [];
+  }
+
+  return ids.filter(
+    (id): id is QuestId =>
+      typeof id === "string" && QUEST_IDS.includes(id as QuestId),
+  );
+}
+
 export type QuestStatus = "available" | "completed" | "locked";
 
 export type QuestProgress = {
@@ -22,7 +40,36 @@ export type QuestDefinition = {
   ctaAvailable: string;
 };
 
+export type QuestCatalogRow = {
+  id: string;
+  title: string;
+  description: string;
+  reward_xp: number;
+};
+
 export const STORAGE_KEY = "basequest-progress";
+
+const QUEST_ENGINE_METADATA: Record<
+  QuestId,
+  Pick<QuestDefinition, "prerequisites" | "ctaAvailable">
+> = {
+  "daily-check-in": {
+    prerequisites: [],
+    ctaAvailable: "Check In",
+  },
+  "connect-wallet": {
+    prerequisites: [],
+    ctaAvailable: "Connect Wallet",
+  },
+  "build-streak": {
+    prerequisites: ["daily-check-in"],
+    ctaAvailable: "View Streak",
+  },
+  "explore-base": {
+    prerequisites: ["connect-wallet", "daily-check-in"],
+    ctaAvailable: "Explore Apps",
+  },
+};
 
 export const QUEST_DEFINITIONS: QuestDefinition[] = [
   {
@@ -31,8 +78,7 @@ export const QUEST_DEFINITIONS: QuestDefinition[] = [
     description:
       "Check in once per day to earn rewards and keep your streak alive.",
     rewardXp: 10,
-    prerequisites: [],
-    ctaAvailable: "Check In",
+    ...QUEST_ENGINE_METADATA["daily-check-in"],
   },
   {
     id: "connect-wallet",
@@ -40,8 +86,7 @@ export const QUEST_DEFINITIONS: QuestDefinition[] = [
     description:
       "Link your wallet to unlock quests and track your Base rewards.",
     rewardXp: 25,
-    prerequisites: [],
-    ctaAvailable: "Connect Wallet",
+    ...QUEST_ENGINE_METADATA["connect-wallet"],
   },
   {
     id: "build-streak",
@@ -49,8 +94,7 @@ export const QUEST_DEFINITIONS: QuestDefinition[] = [
     description:
       "Return daily to grow your streak and unlock bonus engagement rewards.",
     rewardXp: 5,
-    prerequisites: ["daily-check-in"],
-    ctaAvailable: "View Streak",
+    ...QUEST_ENGINE_METADATA["build-streak"],
   },
   {
     id: "explore-base",
@@ -58,10 +102,54 @@ export const QUEST_DEFINITIONS: QuestDefinition[] = [
     description:
       "Discover popular apps in the Base ecosystem and earn bonus XP.",
     rewardXp: 15,
-    prerequisites: ["connect-wallet", "daily-check-in"],
-    ctaAvailable: "Explore Apps",
+    ...QUEST_ENGINE_METADATA["explore-base"],
   },
 ];
+
+function resolveQuestDefinitions(
+  definitions?: QuestDefinition[],
+): QuestDefinition[] {
+  if (definitions && definitions.length > 0) {
+    return definitions;
+  }
+
+  return QUEST_DEFINITIONS;
+}
+
+function findQuestDefinition(
+  questId: QuestId,
+  definitions?: QuestDefinition[],
+): QuestDefinition | undefined {
+  return resolveQuestDefinitions(definitions).find(
+    (quest) => quest.id === questId,
+  );
+}
+
+export function buildQuestDefinitionsFromCatalog(
+  rows: QuestCatalogRow[],
+): QuestDefinition[] {
+  const definitions: QuestDefinition[] = [];
+
+  for (const row of rows) {
+    if (!QUEST_IDS.includes(row.id as QuestId)) {
+      continue;
+    }
+
+    const questId = row.id as QuestId;
+    const metadata = QUEST_ENGINE_METADATA[questId];
+
+    definitions.push({
+      id: questId,
+      title: row.title,
+      description: row.description,
+      rewardXp: row.reward_xp,
+      prerequisites: metadata.prerequisites,
+      ctaAvailable: metadata.ctaAvailable,
+    });
+  }
+
+  return definitions;
+}
 
 export function getDefaultProgress(): QuestProgress {
   return {
@@ -105,35 +193,55 @@ export function normalizeStreak(
   return { ...progress, streak: 0 };
 }
 
-export function loadProgress(): QuestProgress {
+export function getProgressStorageKey(walletAddress?: string | null): string {
+  if (!walletAddress) {
+    return `${STORAGE_KEY}:guest`;
+  }
+
+  return `${STORAGE_KEY}:${walletAddress.toLowerCase()}`;
+}
+
+export function loadProgress(walletAddress?: string | null): QuestProgress {
   if (typeof window === "undefined") {
     return getDefaultProgress();
   }
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const storageKey = getProgressStorageKey(walletAddress);
+    let raw = window.localStorage.getItem(storageKey);
+
+    if (!raw && !walletAddress) {
+      raw = window.localStorage.getItem(STORAGE_KEY);
+    }
+
     if (!raw) {
       return getDefaultProgress();
     }
 
-    const parsed = JSON.parse(raw) as QuestProgress;
+    const parsed = JSON.parse(raw) as Partial<QuestProgress>;
     return {
       totalXp: parsed.totalXp ?? 0,
       streak: parsed.streak ?? 0,
       lastCheckInDate: parsed.lastCheckInDate ?? null,
-      completedQuestIds: parsed.completedQuestIds ?? [],
+      completedQuestIds: parseQuestIds(parsed.completedQuestIds),
     };
   } catch {
     return getDefaultProgress();
   }
 }
 
-export function saveProgress(progress: QuestProgress): void {
+export function saveProgress(
+  progress: QuestProgress,
+  walletAddress?: string | null,
+): void {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  window.localStorage.setItem(
+    getProgressStorageKey(walletAddress),
+    JSON.stringify(progress),
+  );
 }
 
 function hasCompletedQuest(progress: QuestProgress, questId: QuestId): boolean {
@@ -151,8 +259,9 @@ export function getQuestStatus(
   questId: QuestId,
   progress: QuestProgress,
   today = getTodayDateString(),
+  definitions?: QuestDefinition[],
 ): QuestStatus {
-  const definition = QUEST_DEFINITIONS.find((quest) => quest.id === questId);
+  const definition = findQuestDefinition(questId, definitions);
   if (!definition) {
     return "locked";
   }
@@ -172,9 +281,10 @@ export function getQuestCtaLabel(
   questId: QuestId,
   progress: QuestProgress,
   today = getTodayDateString(),
+  definitions?: QuestDefinition[],
 ): string {
-  const status = getQuestStatus(questId, progress, today);
-  const definition = QUEST_DEFINITIONS.find((quest) => quest.id === questId);
+  const status = getQuestStatus(questId, progress, today, definitions);
+  const definition = findQuestDefinition(questId, definitions);
 
   if (!definition) {
     return "Locked";
@@ -194,11 +304,14 @@ export function getQuestCtaLabel(
 export function performDailyCheckIn(
   progress: QuestProgress,
   today = getTodayDateString(),
+  definitions?: QuestDefinition[],
 ): QuestProgress {
   if (progress.lastCheckInDate === today) {
     return progress;
   }
 
+  const rewardXp =
+    findQuestDefinition("daily-check-in", definitions)?.rewardXp ?? 10;
   const yesterday = getPreviousDateString(today);
   const nextStreak =
     progress.lastCheckInDate === yesterday ? progress.streak + 1 : 1;
@@ -208,7 +321,7 @@ export function performDailyCheckIn(
     : [...progress.completedQuestIds, "daily-check-in"];
 
   return {
-    totalXp: progress.totalXp + 10,
+    totalXp: progress.totalXp + rewardXp,
     streak: nextStreak,
     lastCheckInDate: today,
     completedQuestIds,
@@ -217,14 +330,18 @@ export function performDailyCheckIn(
 
 export function completeConnectWalletQuest(
   progress: QuestProgress,
+  definitions?: QuestDefinition[],
 ): QuestProgress {
   if (hasCompletedQuest(progress, "connect-wallet")) {
     return progress;
   }
 
+  const rewardXp =
+    findQuestDefinition("connect-wallet", definitions)?.rewardXp ?? 25;
+
   return {
     ...progress,
-    totalXp: progress.totalXp + 25,
+    totalXp: progress.totalXp + rewardXp,
     completedQuestIds: [...progress.completedQuestIds, "connect-wallet"],
   };
 }
@@ -232,13 +349,14 @@ export function completeConnectWalletQuest(
 export function completeOneTimeQuest(
   progress: QuestProgress,
   questId: QuestId,
+  definitions?: QuestDefinition[],
 ): QuestProgress {
-  const definition = QUEST_DEFINITIONS.find((quest) => quest.id === questId);
+  const definition = findQuestDefinition(questId, definitions);
   if (!definition || questId === "daily-check-in" || questId === "connect-wallet") {
     return progress;
   }
 
-  if (getQuestStatus(questId, progress) !== "available") {
+  if (getQuestStatus(questId, progress, getTodayDateString(), definitions) !== "available") {
     return progress;
   }
 
@@ -257,16 +375,17 @@ export function performQuestAction(
   progress: QuestProgress,
   questId: QuestId,
   today = getTodayDateString(),
+  definitions?: QuestDefinition[],
 ): QuestProgress {
   if (questId === "daily-check-in") {
-    return performDailyCheckIn(progress, today);
+    return performDailyCheckIn(progress, today, definitions);
   }
 
   if (questId === "connect-wallet") {
-    return completeConnectWalletQuest(progress);
+    return completeConnectWalletQuest(progress, definitions);
   }
 
-  return completeOneTimeQuest(progress, questId);
+  return completeOneTimeQuest(progress, questId, definitions);
 }
 
 export function getCompletedQuestCount(progress: QuestProgress): number {
@@ -284,15 +403,16 @@ export type QuestViewModel = {
 
 export function getQuestViewModels(
   progress: QuestProgress,
+  definitions?: QuestDefinition[],
   today = getTodayDateString(),
 ): QuestViewModel[] {
-  return QUEST_DEFINITIONS.map((definition) => ({
+  return resolveQuestDefinitions(definitions).map((definition) => ({
     id: definition.id,
     title: definition.title,
     description: definition.description,
     reward: `+${definition.rewardXp} XP`,
-    status: getQuestStatus(definition.id, progress, today),
-    ctaLabel: getQuestCtaLabel(definition.id, progress, today),
+    status: getQuestStatus(definition.id, progress, today, definitions),
+    ctaLabel: getQuestCtaLabel(definition.id, progress, today, definitions),
   }));
 }
 

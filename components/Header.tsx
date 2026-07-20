@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Header() {
   return (
     <header className="sticky top-0 z-10 w-full px-4 pt-5 pb-2 sm:px-6">
@@ -15,9 +17,29 @@ export default function Header() {
             BaseQuest Rewards
           </span>
         </div>
-        <span className="shrink-0 rounded-badge border border-glass-border bg-base-blue px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-text-primary shadow-sm">
-          Base
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/"
+            className="rounded-badge border border-glass-border bg-glass-bg px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-text-primary shadow-sm transition-opacity hover:opacity-90"
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/leaderboard"
+            className="rounded-badge border border-glass-border bg-glass-bg px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-text-primary shadow-sm transition-opacity hover:opacity-90"
+          >
+            Leaderboard
+          </Link>
+          <Link
+            href="/profile"
+            className="rounded-badge border border-glass-border bg-glass-bg px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-text-primary shadow-sm transition-opacity hover:opacity-90"
+          >
+            Profile
+          </Link>
+          <span className="rounded-badge border border-glass-border bg-base-blue px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-text-primary shadow-sm">
+            Base
+          </span>
+        </div>
       </div>
     </header>
   );

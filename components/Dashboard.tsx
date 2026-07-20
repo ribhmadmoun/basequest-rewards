@@ -1,9 +1,12 @@
 "use client";
 
 import Header from "@/components/Header";
+import LevelProgressBar from "@/components/LevelProgressBar";
+import LevelUpCelebration from "@/components/LevelUpCelebration";
 import QuestCard from "@/components/QuestCard";
 import WalletStatusCard from "@/components/WalletStatusCard";
 import { useQuestEngine } from "@/hooks/useQuestEngine";
+import { getLevel } from "@/lib/levels";
 import type { QuestId } from "@/lib/quest-engine";
 
 export default function Dashboard() {
@@ -11,9 +14,11 @@ export default function Dashboard() {
     hydrated,
     quests,
     progressStats,
+    totalXp,
+    levelUpLevel,
+    clearLevelUpCelebration,
     isWalletQuestCompleted,
     handleQuestAction,
-    handleWalletConnected,
   } = useQuestEngine();
 
   if (!hydrated) {
@@ -39,6 +44,13 @@ export default function Dashboard() {
       <Header />
 
       <main className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col gap-10 px-5 py-8 sm:gap-12 sm:px-6 sm:py-12">
+        {levelUpLevel ? (
+          <LevelUpCelebration
+            level={levelUpLevel}
+            onDismiss={clearLevelUpCelebration}
+          />
+        ) : null}
+
         <section className="text-center sm:text-left">
           <p className="text-xs font-semibold uppercase tracking-widest text-text-secondary">
             Dashboard
@@ -75,6 +87,16 @@ export default function Dashboard() {
                 </p>
               </article>
             ))}
+            <article className="rounded-card border border-glass-border bg-glass-bg p-5 text-center shadow-lg shadow-black/10 backdrop-blur-xl sm:p-6 sm:text-left">
+              <p className="text-xs font-semibold uppercase tracking-widest text-text-secondary">
+                Current Level
+              </p>
+              <p className="mt-2 font-sans text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
+                Level {getLevel(totalXp)}
+              </p>
+              <p className="mt-1 text-sm text-text-muted">{totalXp} XP</p>
+              <LevelProgressBar totalXp={totalXp} />
+            </article>
           </div>
         </section>
 
@@ -88,7 +110,7 @@ export default function Dashboard() {
             </h2>
           </div>
 
-          <WalletStatusCard onWalletConnected={handleWalletConnected} />
+          <WalletStatusCard />
         </section>
 
         <section>
@@ -119,7 +141,6 @@ export default function Dashboard() {
                   quest.id === "connect-wallet" ? isWalletQuestCompleted : false
                 }
                 onAction={() => handleQuestAction(quest.id as QuestId)}
-                onWalletConnected={handleWalletConnected}
               />
             ))}
           </div>

@@ -7,7 +7,6 @@ type ConnectWalletQuestButtonProps = {
   buttonClassName: string;
   disabledClassName: string;
   questCompleted?: boolean;
-  onWalletConnected?: () => void;
 };
 
 export default function ConnectWalletQuestButton({
@@ -15,7 +14,6 @@ export default function ConnectWalletQuestButton({
   buttonClassName,
   disabledClassName,
   questCompleted = false,
-  onWalletConnected,
 }: ConnectWalletQuestButtonProps) {
   return (
     <ConnectWalletButton
@@ -25,7 +23,6 @@ export default function ConnectWalletQuestButton({
       buttonClassName={buttonClassName}
       disabledClassName={disabledClassName}
       questCompleted={questCompleted}
-      onWalletConnected={onWalletConnected}
     />
   );
 }

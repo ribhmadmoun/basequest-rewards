@@ -3,10 +3,6 @@
 import ConnectWalletButton from "@/components/ConnectWalletButton";
 import { useAccount, useDisconnect } from "wagmi";
 
-type WalletStatusCardProps = {
-  onWalletConnected?: () => void;
-};
-
 function shortenAddress(address: string) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
@@ -19,9 +15,7 @@ function getButtonClassName(isPrimary: boolean) {
   }`;
 }
 
-export default function WalletStatusCard({
-  onWalletConnected,
-}: WalletStatusCardProps) {
+export default function WalletStatusCard() {
   const { address, status } = useAccount();
   const { disconnect, isPending: isDisconnecting } = useDisconnect();
 
@@ -74,7 +68,6 @@ export default function WalletStatusCard({
             connectingLabel="Connecting..."
             buttonClassName={getButtonClassName(true)}
             disabledClassName={getButtonClassName(false)}
-            onWalletConnected={onWalletConnected}
             className="w-full sm:w-auto sm:min-w-[140px]"
           />
         )}

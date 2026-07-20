@@ -10,7 +10,6 @@ type ConnectWalletButtonProps = {
   buttonClassName: string;
   disabledClassName: string;
   questCompleted?: boolean;
-  onWalletConnected?: () => void;
   className?: string;
 };
 
@@ -21,23 +20,16 @@ export default function ConnectWalletButton({
   buttonClassName,
   disabledClassName,
   questCompleted = false,
-  onWalletConnected,
   className = "",
 }: ConnectWalletButtonProps) {
-  const [userConnected, setUserConnected] = useState(false);
   const [userConnecting, setUserConnecting] = useState(false);
 
   return (
     <ConnectWallet
       disconnectedLabel={connectLabel}
-      onConnect={() => {
-        setUserConnected(true);
-        onWalletConnected?.();
-      }}
-      render={({ onClick, status: walletStatus, isLoading }) => {
+      render={({ onClick, isLoading }) => {
         const showCompleted =
-          completedLabel !== undefined &&
-          (questCompleted || (userConnected && walletStatus === "connected"));
+          completedLabel !== undefined && questCompleted;
 
         if (showCompleted) {
           return (
