@@ -5,6 +5,7 @@ import {
   getProgressPercent,
   MAX_LEVEL,
 } from "@/lib/levels";
+import { ui } from "@/lib/ui-styles";
 
 type LevelProgressBarProps = {
   totalXp: number;
@@ -36,9 +37,7 @@ export default function LevelProgressBar({
               </span>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-text-secondary">
-                Current Level
-              </p>
+              <p className={ui.statLabel}>Current Level</p>
               <p className="mt-1 font-sans text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
                 Level {level}
               </p>

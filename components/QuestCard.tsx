@@ -1,6 +1,7 @@
 "use client";
 
 import ConnectWalletQuestButton from "@/components/ConnectWalletQuestButton";
+import { ui } from "@/lib/ui-styles";
 
 export type QuestStatus = "available" | "completed" | "locked";
 
@@ -22,17 +23,14 @@ const statusLabels: Record<QuestStatus, string> = {
 };
 
 const statusBadgeStyles: Record<QuestStatus, string> = {
-  available: "bg-base-blue text-text-primary",
-  completed: "bg-glass-bg text-text-secondary",
-  locked: "bg-glass-bg text-text-muted",
+  available:
+    "border-base-blue/50 bg-base-blue text-text-primary shadow-[0_0_10px_rgba(0,82,255,0.35)]",
+  completed: "border-white/20 bg-white/10 text-text-secondary",
+  locked: "border-glass-border bg-glass-bg/70 text-text-muted",
 };
 
 function getCtaButtonClassName(isActionable: boolean) {
-  return `mt-5 w-full rounded-card border px-4 py-2.5 text-sm font-semibold transition-opacity sm:mt-6 ${
-    isActionable
-      ? "border-glass-border bg-base-blue text-text-primary hover:opacity-90"
-      : "cursor-not-allowed border-glass-border bg-glass-bg text-text-muted opacity-70"
-  }`;
+  return isActionable ? ui.primaryButton : `${ui.secondaryButton} opacity-70 cursor-not-allowed`;
 }
 
 export default function QuestCard({
@@ -49,42 +47,44 @@ export default function QuestCard({
   const isConnectWalletQuest = questId === "connect-wallet";
 
   return (
-    <article className="flex h-full flex-col rounded-card border border-glass-border bg-glass-bg p-5 shadow-lg shadow-black/10 backdrop-blur-xl sm:p-6">
+    <article className={`${ui.glassCardInteractive} flex h-full flex-col p-5 sm:p-6`}>
       <div className="flex items-start justify-between gap-3">
         <span
-          className={`rounded-badge border border-glass-border px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-widest ${statusBadgeStyles[status]}`}
+          className={`rounded-badge border px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest sm:px-3 sm:text-[0.65rem] ${statusBadgeStyles[status]}`}
         >
           {statusLabels[status]}
         </span>
-        <span className="shrink-0 rounded-badge border border-glass-border bg-base-blue px-3 py-1 text-xs font-semibold uppercase tracking-wide text-text-primary">
+        <span className="shrink-0 rounded-badge border border-glass-border bg-base-blue px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-text-primary sm:px-3 sm:text-xs">
           {reward}
         </span>
       </div>
 
-      <h3 className="mt-4 font-sans text-base font-semibold tracking-tight text-text-primary sm:text-lg">
+      <h3 className="mt-3.5 font-sans text-base font-semibold tracking-tight text-text-primary sm:mt-4 sm:text-lg">
         {title}
       </h3>
-      <p className="mt-2 flex-1 text-sm leading-6 text-text-muted sm:text-base sm:leading-7">
+      <p className="mt-2 flex-1 text-sm leading-6 text-text-muted sm:leading-7">
         {description}
       </p>
 
-      {isConnectWalletQuest ? (
-        <ConnectWalletQuestButton
-          ctaLabel={ctaLabel}
-          questCompleted={questCompleted}
-          buttonClassName={getCtaButtonClassName(true)}
-          disabledClassName={getCtaButtonClassName(false)}
-        />
-      ) : (
-        <button
-          type="button"
-          disabled={!isActionable}
-          onClick={onAction}
-          className={getCtaButtonClassName(isActionable)}
-        >
-          {ctaLabel}
-        </button>
-      )}
+      <div className="pt-4 sm:pt-5">
+        {isConnectWalletQuest ? (
+          <ConnectWalletQuestButton
+            ctaLabel={ctaLabel}
+            questCompleted={questCompleted}
+            buttonClassName={`${getCtaButtonClassName(true)} w-full`}
+            disabledClassName={`${getCtaButtonClassName(false)} w-full`}
+          />
+        ) : (
+          <button
+            type="button"
+            disabled={!isActionable}
+            onClick={onAction}
+            className={`${getCtaButtonClassName(isActionable)} w-full`}
+          >
+            {ctaLabel}
+          </button>
+        )}
+      </div>
     </article>
   );
 }
