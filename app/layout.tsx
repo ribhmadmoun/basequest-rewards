@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BaseQuest Rewards",
   description: "Daily rewards and engagement for the Base ecosystem.",
+  other: {
+    "base:app_id": "6a5e99b82ef8a18fb639b9e7",
+  },
 };
 
 export default function RootLayout({
