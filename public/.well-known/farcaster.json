@@ -3,7 +3,7 @@
     "version": "1",
     "name": "BaseQuest Rewards",
     "homeUrl": "https://basequest-rewards.vercel.app/",
-    "iconUrl": "https://YOUR_PRODUCTION_DOMAIN/app-icon.png",
+    "iconUrl": "https://basequest-rewards.vercel.app/app-icon.png",
     "splashBackgroundColor": "#0052FF",
     "subtitle": "Daily rewards on Base",
     "description": "Daily rewards and engagement for the Base ecosystem.",
