@@ -6,7 +6,6 @@ import {
   getDefaultProgress,
   getProgressStats,
   getQuestViewModels,
-  getTodayDateString,
   loadProgress,
   normalizeStreak,
   performQuestAction,
@@ -30,13 +29,11 @@ function getStorageWalletAddress(address?: string | null) {
   return address?.toLowerCase() ?? null;
 }
 
-function persistProgressLocally(
+function cacheProgressLocally(
   progress: QuestProgress,
   walletAddress?: string | null,
 ) {
-  const normalized = normalizeStreak(progress);
-  saveProgress(normalized, walletAddress);
-  return normalized;
+  saveProgress(normalizeStreak(progress), walletAddress);
 }
 
 export function useQuestEngine() {
@@ -47,25 +44,31 @@ export function useQuestEngine() {
   const [levelUpLevel, setLevelUpLevel] = useState<number | null>(null);
   const { address, status: walletStatus } = useAccount();
   const isWalletConnected = walletStatus === "connected";
+  const isWalletReconnecting =
+    walletStatus === "connecting" || walletStatus === "reconnecting";
   const storageWalletAddress = getStorageWalletAddress(address);
 
   useEffect(() => {
-    const loaded = persistProgressLocally(loadProgress(), null);
-    setProgress(loaded);
     setHydrated(true);
   }, []);
 
   useEffect(() => {
-    if (!hydrated) {
+    if (!hydrated || isWalletReconnecting) {
       return;
     }
 
-    const loaded = persistProgressLocally(
-      loadProgress(storageWalletAddress),
-      storageWalletAddress,
-    );
-    setProgress(loaded);
-  }, [hydrated, storageWalletAddress]);
+    // Authenticated users load from Supabase in syncUserProgress.
+    if (isWalletConnected && storageWalletAddress) {
+      return;
+    }
+
+    setProgress(normalizeStreak(loadProgress(storageWalletAddress)));
+  }, [
+    hydrated,
+    storageWalletAddress,
+    isWalletConnected,
+    isWalletReconnecting,
+  ]);
 
   useEffect(() => {
     let cancelled = false;
@@ -106,26 +109,8 @@ export function useQuestEngine() {
           return;
         }
 
-        const localProgress = normalizeStreak(
-          loadProgress(storageWalletAddress),
-        );
         let next = normalizeStreak(userRowToProgress(user));
         next = completeConnectWalletQuest(next, questDefinitions);
-
-        const today = getTodayDateString();
-        if (
-          localProgress.lastCheckInDate === today &&
-          next.lastCheckInDate !== today
-        ) {
-          next = {
-            ...next,
-            lastCheckInDate: localProgress.lastCheckInDate,
-            streak: Math.max(next.streak, localProgress.streak),
-            totalXp: Math.max(next.totalXp, localProgress.totalXp),
-          };
-        }
-
-        next = persistProgressLocally(next, storageWalletAddress);
 
         if (cancelled) {
           return;
@@ -136,21 +121,23 @@ export function useQuestEngine() {
         try {
           await saveUserProgress(walletAddress, next);
         } catch {
-          // localStorage fallback already saved
+          // Supabase unavailable; local cache below is offline fallback only.
         }
+
+        cacheProgressLocally(next, storageWalletAddress);
       } catch {
         if (cancelled) {
           return;
         }
 
-        const fallback = persistProgressLocally(
+        const fallback = normalizeStreak(
           completeConnectWalletQuest(
-            normalizeStreak(loadProgress(storageWalletAddress)),
+            loadProgress(storageWalletAddress),
             questDefinitions,
           ),
-          storageWalletAddress,
         );
         setProgress(fallback);
+        cacheProgressLocally(fallback, storageWalletAddress);
       }
     }
 
@@ -170,12 +157,18 @@ export function useQuestEngine() {
   const updateProgress = useCallback(
     (updater: (current: QuestProgress) => QuestProgress) => {
       setProgress((current) => {
-        const next = persistProgressLocally(updater(current), storageWalletAddress);
+        const next = normalizeStreak(updater(current));
 
         if (address && isWalletConnected) {
-          void saveUserProgress(address, next).catch(() => {
-            // localStorage fallback already saved
-          });
+          void saveUserProgress(address, next)
+            .then(() => {
+              cacheProgressLocally(next, storageWalletAddress);
+            })
+            .catch(() => {
+              cacheProgressLocally(next, storageWalletAddress);
+            });
+        } else {
+          cacheProgressLocally(next, storageWalletAddress);
         }
 
         return next;
