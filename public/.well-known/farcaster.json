@@ -1,4 +1,9 @@
 {
+  "accountAssociation": {
+    "header": "eyJmaWQiOjM2ODU5MSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweDE4MTkxNzFjNzZENEI5OTNhZTZmMTRmNDMzODFiMURmY2QyQUEwOWYifQ",
+    "payload": "eyJkb21haW4iOiJiYXNlcXVlc3QtcmV3YXJkcy52ZXJjZWwuYXBwIn0",
+    "signature": "0q53HduK22ktOKto3k46HTFKgQFnEkqKR8E9FGph7Ggx8dpQYSHXjhTON69FDXyxR7M2a73Fh1mtlfvA8PvSkBw="
+  },
   "miniapp": {
     "version": "1",
     "name": "BaseQuest Rewards",
