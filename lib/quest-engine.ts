@@ -167,6 +167,17 @@ export function getTodayDateString(date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
+export function normalizeCheckInDate(
+  value: string | null | undefined,
+): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+  return match?.[1] ?? null;
+}
+
 function getPreviousDateString(dateString: string): string {
   const [year, month, day] = dateString.split("-").map(Number);
   const date = new Date(year, month - 1, day);
@@ -178,19 +189,25 @@ export function normalizeStreak(
   progress: QuestProgress,
   today = getTodayDateString(),
 ): QuestProgress {
-  if (!progress.lastCheckInDate) {
-    return progress.streak === 0 ? progress : { ...progress, streak: 0 };
+  const lastCheckInDate = normalizeCheckInDate(progress.lastCheckInDate);
+
+  if (!lastCheckInDate) {
+    return progress.streak === 0 && progress.lastCheckInDate === null
+      ? progress
+      : { ...progress, lastCheckInDate: null, streak: 0 };
   }
+
+  const normalizedProgress =
+    lastCheckInDate === progress.lastCheckInDate
+      ? progress
+      : { ...progress, lastCheckInDate };
 
   const yesterday = getPreviousDateString(today);
-  if (
-    progress.lastCheckInDate === today ||
-    progress.lastCheckInDate === yesterday
-  ) {
-    return progress;
+  if (lastCheckInDate === today || lastCheckInDate === yesterday) {
+    return normalizedProgress;
   }
 
-  return { ...progress, streak: 0 };
+  return { ...normalizedProgress, streak: 0 };
 }
 
 export function getProgressStorageKey(walletAddress?: string | null): string {
@@ -222,7 +239,7 @@ export function loadProgress(walletAddress?: string | null): QuestProgress {
     return {
       totalXp: parsed.totalXp ?? 0,
       streak: parsed.streak ?? 0,
-      lastCheckInDate: parsed.lastCheckInDate ?? null,
+      lastCheckInDate: normalizeCheckInDate(parsed.lastCheckInDate),
       completedQuestIds: parseQuestIds(parsed.completedQuestIds),
     };
   } catch {
@@ -271,7 +288,9 @@ export function getQuestStatus(
   }
 
   if (questId === "daily-check-in") {
-    return progress.lastCheckInDate === today ? "completed" : "available";
+    return normalizeCheckInDate(progress.lastCheckInDate) === today
+      ? "completed"
+      : "available";
   }
 
   return hasCompletedQuest(progress, questId) ? "completed" : "available";
@@ -306,15 +325,19 @@ export function performDailyCheckIn(
   today = getTodayDateString(),
   definitions?: QuestDefinition[],
 ): QuestProgress {
-  if (progress.lastCheckInDate === today) {
-    return progress;
+  const lastCheckInDate = normalizeCheckInDate(progress.lastCheckInDate);
+
+  if (lastCheckInDate === today) {
+    return progress.lastCheckInDate === today
+      ? progress
+      : { ...progress, lastCheckInDate: today };
   }
 
   const rewardXp =
     findQuestDefinition("daily-check-in", definitions)?.rewardXp ?? 10;
   const yesterday = getPreviousDateString(today);
   const nextStreak =
-    progress.lastCheckInDate === yesterday ? progress.streak + 1 : 1;
+    lastCheckInDate === yesterday ? progress.streak + 1 : 1;
 
   const completedQuestIds: QuestId[] = hasCompletedQuest(progress, "daily-check-in")
     ? progress.completedQuestIds

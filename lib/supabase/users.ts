@@ -1,5 +1,6 @@
 import {
   getDefaultProgress,
+  normalizeCheckInDate,
   parseQuestIds,
   type QuestId,
   type QuestProgress,
@@ -38,7 +39,7 @@ export function userRowToProgress(row: UserRow): QuestProgress {
   return {
     totalXp: row.total_xp ?? 0,
     streak: row.streak ?? 0,
-    lastCheckInDate: row.last_checkin ?? null,
+    lastCheckInDate: normalizeCheckInDate(row.last_checkin),
     completedQuestIds: parseQuestIds(row.completed_quests),
   };
 }

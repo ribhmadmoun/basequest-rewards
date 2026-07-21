@@ -6,6 +6,7 @@ import {
   getDefaultProgress,
   getProgressStats,
   getQuestViewModels,
+  getTodayDateString,
   loadProgress,
   normalizeStreak,
   performQuestAction,
@@ -105,8 +106,25 @@ export function useQuestEngine() {
           return;
         }
 
+        const localProgress = normalizeStreak(
+          loadProgress(storageWalletAddress),
+        );
         let next = normalizeStreak(userRowToProgress(user));
         next = completeConnectWalletQuest(next, questDefinitions);
+
+        const today = getTodayDateString();
+        if (
+          localProgress.lastCheckInDate === today &&
+          next.lastCheckInDate !== today
+        ) {
+          next = {
+            ...next,
+            lastCheckInDate: localProgress.lastCheckInDate,
+            streak: Math.max(next.streak, localProgress.streak),
+            totalXp: Math.max(next.totalXp, localProgress.totalXp),
+          };
+        }
+
         next = persistProgressLocally(next, storageWalletAddress);
 
         if (cancelled) {
