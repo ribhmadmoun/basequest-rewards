@@ -4,6 +4,7 @@ import {
   DAILY_CHECK_IN_ABI,
   DAILY_CHECK_IN_ADDRESS,
 } from "@/lib/contracts/DailyCheckIn";
+import { DATA_SUFFIX } from "@/lib/builderCode";
 import { useState } from "react";
 import { useConfig, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "wagmi/actions";
@@ -28,23 +29,27 @@ export default function DailyCheckInQuestButton({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleCheckIn() {
-    if (isSubmitting) {
-      return;
-    }
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
+
     try {
       const hash = await writeContractAsync({
         address: DAILY_CHECK_IN_ADDRESS,
         abi: DAILY_CHECK_IN_ABI,
         functionName: "checkIn",
+        dataSuffix: DATA_SUFFIX,
       });
 
-      await waitForTransactionReceipt(config, { hash });
-      console.log(hash);
+      await waitForTransactionReceipt(config, {
+        hash,
+      });
+
+      console.log("Transaction:", hash);
+
       onSuccess?.();
     } catch (error) {
-      console.error(error);
+      console.error("Daily Check-in failed:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -56,9 +61,7 @@ export default function DailyCheckInQuestButton({
     <button
       type="button"
       disabled={isDisabled}
-      onClick={() => {
-        void handleCheckIn();
-      }}
+      onClick={() => void handleCheckIn()}
       className={`${isDisabled ? disabledClassName : buttonClassName} w-full`}
     >
       {isSubmitting ? "Checking in..." : ctaLabel}
