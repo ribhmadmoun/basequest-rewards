@@ -1,7 +1,7 @@
 "use client";
 
-import { ConnectWallet } from "@coinbase/onchainkit/wallet";
-import { useState } from "react";
+import { useAccount, useConnect } from "wagmi";
+import { useEffect } from "react";
 
 type ConnectWalletButtonProps = {
   connectLabel?: string;
@@ -22,43 +22,66 @@ export default function ConnectWalletButton({
   questCompleted = false,
   className = "",
 }: ConnectWalletButtonProps) {
-  const [userConnecting, setUserConnecting] = useState(false);
+  const { isConnected } = useAccount();
+
+  const {
+    connect,
+    connectors,
+    isPending,
+  } = useConnect();
+
+  useEffect(() => {
+    console.log(
+      "Available connectors:",
+      connectors.map((c) => ({
+        id: c.id,
+        name: c.name,
+      })),
+    );
+  }, [connectors]);
+
+  if (completedLabel && questCompleted) {
+    return (
+      <button
+        type="button"
+        disabled
+        className={`${disabledClassName} ${className}`.trim()}
+      >
+        {completedLabel}
+      </button>
+    );
+  }
+
+  const handleConnect = () => {
+    const connector =
+      connectors.find((c) => c.id === "injected") ??
+      connectors.find((c) => c.id === "coinbaseWallet") ??
+      connectors.find((c) => c.id === "walletConnect");
+
+    if (!connector) {
+      console.error("No connector found");
+      return;
+    }
+
+    console.log("Connecting with:", connector.name);
+
+    connect({
+      connector,
+    });
+  };
+
+  const disabled = isPending || isConnected;
 
   return (
-    <ConnectWallet
-      disconnectedLabel={connectLabel}
-      render={({ onClick, isLoading }) => {
-        const showCompleted =
-          completedLabel !== undefined && questCompleted;
-
-        if (showCompleted) {
-          return (
-            <button
-              type="button"
-              disabled
-              className={`${disabledClassName} ${className}`.trim()}
-            >
-              {completedLabel}
-            </button>
-          );
-        }
-
-        const isBusy = userConnecting && isLoading;
-
-        return (
-          <button
-            type="button"
-            disabled={isBusy}
-            onClick={() => {
-              setUserConnecting(true);
-              onClick();
-            }}
-            className={`${isBusy ? disabledClassName : buttonClassName} ${className}`.trim()}
-          >
-            {isBusy ? connectingLabel : connectLabel}
-          </button>
-        );
-      }}
-    />
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={handleConnect}
+      className={`${
+        disabled ? disabledClassName : buttonClassName
+      } ${className}`.trim()}
+    >
+      {isPending ? connectingLabel : connectLabel}
+    </button>
   );
 }
