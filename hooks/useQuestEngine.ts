@@ -62,7 +62,14 @@ export function useQuestEngine() {
       return;
     }
 
-    setProgress(normalizeStreak(loadProgress(storageWalletAddress)));
+    const next = normalizeStreak(loadProgress(storageWalletAddress));
+    console.log("SET_PROGRESS", "line 65", {
+      lastCheckInDate: next.lastCheckInDate,
+      totalXp: next.totalXp,
+      completedQuestIds: next.completedQuestIds,
+    });
+    console.log("SET_PROGRESS_LINE_71");
+    setProgress(next);
   }, [
     hydrated,
     storageWalletAddress,
@@ -116,6 +123,12 @@ export function useQuestEngine() {
           return;
         }
 
+        console.log("SET_PROGRESS", "line 119", {
+          lastCheckInDate: next.lastCheckInDate,
+          totalXp: next.totalXp,
+          completedQuestIds: next.completedQuestIds,
+        });
+        console.log("SET_PROGRESS_LINE_130");
         setProgress(next);
 
         try {
@@ -125,7 +138,8 @@ export function useQuestEngine() {
         }
 
         cacheProgressLocally(next, storageWalletAddress);
-      } catch {
+      } catch (error) {
+        console.error("SYNC ERROR", error);
         if (cancelled) {
           return;
         }
@@ -136,6 +150,12 @@ export function useQuestEngine() {
             questDefinitions,
           ),
         );
+        console.log("SET_PROGRESS", "line 139", {
+          lastCheckInDate: fallback.lastCheckInDate,
+          totalXp: fallback.totalXp,
+          completedQuestIds: fallback.completedQuestIds,
+        });
+        console.log("SET_PROGRESS_LINE_155");
         setProgress(fallback);
         cacheProgressLocally(fallback, storageWalletAddress);
       }
@@ -156,8 +176,15 @@ export function useQuestEngine() {
 
   const updateProgress = useCallback(
     (updater: (current: QuestProgress) => QuestProgress) => {
+      console.log("SET_PROGRESS_LINE_175");
       setProgress((current) => {
         const next = normalizeStreak(updater(current));
+
+        console.log("SET_PROGRESS", "line 159", {
+          lastCheckInDate: next.lastCheckInDate,
+          totalXp: next.totalXp,
+          completedQuestIds: next.completedQuestIds,
+        });
 
         if (address && isWalletConnected) {
           void saveUserProgress(address, next)

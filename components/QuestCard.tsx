@@ -1,6 +1,7 @@
 "use client";
 
 import ConnectWalletQuestButton from "@/components/ConnectWalletQuestButton";
+import DailyCheckInQuestButton from "@/components/DailyCheckInQuestButton";
 import { ui } from "@/lib/ui-styles";
 
 export type QuestStatus = "available" | "completed" | "locked";
@@ -45,6 +46,7 @@ export default function QuestCard({
 }: QuestCardProps) {
   const isActionable = status === "available";
   const isConnectWalletQuest = questId === "connect-wallet";
+  const isDailyCheckInQuest = questId === "daily-check-in";
 
   return (
     <article className={`${ui.glassCardInteractive} flex h-full flex-col p-5 sm:p-6`}>
@@ -73,6 +75,14 @@ export default function QuestCard({
             questCompleted={questCompleted}
             buttonClassName={`${getCtaButtonClassName(true)} w-full`}
             disabledClassName={`${getCtaButtonClassName(false)} w-full`}
+          />
+        ) : isDailyCheckInQuest ? (
+          <DailyCheckInQuestButton
+            ctaLabel={ctaLabel}
+            disabled={!isActionable}
+            buttonClassName={getCtaButtonClassName(true)}
+            disabledClassName={getCtaButtonClassName(false)}
+            onSuccess={onAction}
           />
         ) : (
           <button
