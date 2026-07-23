@@ -2,6 +2,7 @@ import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 import { createConfig, http } from "wagmi";
 import { base } from "wagmi/chains";
 import {
+  baseAccount,
   coinbaseWallet,
   injected,
   walletConnect,
@@ -11,8 +12,12 @@ export const wagmiConfig = createConfig({
   ssr: true,
   chains: [base],
   connectors: [
-    // Official Farcaster Mini App connector — preferred inside Mini App hosts.
+    // Farcaster Mini App clients only.
     farcasterMiniApp(),
+    // Base App / Base Account path.
+    baseAccount({
+      appName: "BaseQuest Rewards",
+    }),
     // Standard browser wallets.
     injected(),
     coinbaseWallet({

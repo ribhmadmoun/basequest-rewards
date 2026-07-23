@@ -21,6 +21,25 @@ function getFarcasterMiniAppConnector(
   );
 }
 
+function getBaseAppConnector(
+  connectors: readonly Connector[],
+): Connector | undefined {
+  return (
+    findConnector(
+      connectors,
+      (connector) =>
+        connector.id === "baseAccount" || connector.type === "baseAccount",
+    ) ??
+    findConnector(
+      connectors,
+      (connector) =>
+        connector.id === "coinbaseWalletSDK" ||
+        connector.id === "coinbaseWallet",
+    ) ??
+    findConnector(connectors, (connector) => connector.id === "injected")
+  );
+}
+
 function getBrowserConnector(
   connectors: readonly Connector[],
 ): Connector | undefined {
@@ -37,18 +56,21 @@ function getBrowserConnector(
 }
 
 /**
- * Prefers the official Farcaster Mini App connector inside Mini App hosts.
- * Never auto-selects `injected` inside Mini Apps.
- * Browser keeps the existing injected → Coinbase → WalletConnect order.
+ * Connector preference:
+ * - Base App → baseAccount / Coinbase / injected Base provider (never farcasterMiniApp)
+ * - Farcaster client → farcasterMiniApp (isFarcasterClient only)
+ * - Browser → injected → Coinbase → WalletConnect
  */
 export function getPreferredConnector(
   connectors: readonly Connector[],
   environment: AppEnvironment,
 ): Connector | undefined {
-  const farcasterConnector = getFarcasterMiniAppConnector(connectors);
+  if (environment.isBaseApp) {
+    return getBaseAppConnector(connectors);
+  }
 
-  if (environment.isMiniApp) {
-    return farcasterConnector;
+  if (environment.isFarcasterClient) {
+    return getFarcasterMiniAppConnector(connectors);
   }
 
   return getBrowserConnector(connectors);
