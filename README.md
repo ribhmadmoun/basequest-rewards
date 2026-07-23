@@ -83,7 +83,7 @@ create table quests (
 insert into quests (id, title, description, reward_xp, status, display_order, enabled)
 values
   ('daily-check-in', 'Daily Check-in', 'Check in once per day to earn rewards and keep your streak alive.', 10, 'active', 1, true),
-  ('connect-wallet', 'Connect Wallet', 'Link your wallet to unlock quests and track your Base rewards.', 25, 'active', 2, true),
+  ('view-leaderboard', 'View Leaderboard', 'Open the leaderboard for the first time.', 25, 'active', 2, true),
   ('build-streak', 'Build Your Streak', 'Return daily to grow your streak and unlock bonus engagement rewards.', 5, 'active', 3, true),
   ('explore-base', 'Explore Base Apps', 'Discover popular apps in the Base ecosystem and earn bonus XP.', 15, 'active', 4, true);
 ```

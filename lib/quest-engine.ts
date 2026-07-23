@@ -1,12 +1,12 @@
 export type QuestId =
   | "daily-check-in"
-  | "connect-wallet"
+  | "view-leaderboard"
   | "build-streak"
   | "explore-base";
 
 const QUEST_IDS: QuestId[] = [
   "daily-check-in",
-  "connect-wallet",
+  "view-leaderboard",
   "build-streak",
   "explore-base",
 ];
@@ -57,16 +57,16 @@ const QUEST_ENGINE_METADATA: Record<
     prerequisites: [],
     ctaAvailable: "Check In",
   },
-  "connect-wallet": {
+  "view-leaderboard": {
     prerequisites: [],
-    ctaAvailable: "Connect Wallet",
+    ctaAvailable: "Open Leaderboard",
   },
   "build-streak": {
     prerequisites: ["daily-check-in"],
     ctaAvailable: "View Streak",
   },
   "explore-base": {
-    prerequisites: ["connect-wallet", "daily-check-in"],
+    prerequisites: ["daily-check-in"],
     ctaAvailable: "Explore Apps",
   },
 };
@@ -81,12 +81,11 @@ export const QUEST_DEFINITIONS: QuestDefinition[] = [
     ...QUEST_ENGINE_METADATA["daily-check-in"],
   },
   {
-    id: "connect-wallet",
-    title: "Connect Wallet",
-    description:
-      "Link your wallet to unlock quests and track your Base rewards.",
+    id: "view-leaderboard",
+    title: "View Leaderboard",
+    description: "Open the leaderboard for the first time.",
     rewardXp: 25,
-    ...QUEST_ENGINE_METADATA["connect-wallet"],
+    ...QUEST_ENGINE_METADATA["view-leaderboard"],
   },
   {
     id: "build-streak",
@@ -314,7 +313,7 @@ export function getQuestCtaLabel(
   }
 
   if (status === "completed") {
-    return questId === "connect-wallet" ? "Completed" : "Completed";
+    return "Completed";
   }
 
   return definition.ctaAvailable;
@@ -351,31 +350,13 @@ export function performDailyCheckIn(
   };
 }
 
-export function completeConnectWalletQuest(
-  progress: QuestProgress,
-  definitions?: QuestDefinition[],
-): QuestProgress {
-  if (hasCompletedQuest(progress, "connect-wallet")) {
-    return progress;
-  }
-
-  const rewardXp =
-    findQuestDefinition("connect-wallet", definitions)?.rewardXp ?? 25;
-
-  return {
-    ...progress,
-    totalXp: progress.totalXp + rewardXp,
-    completedQuestIds: [...progress.completedQuestIds, "connect-wallet"],
-  };
-}
-
 export function completeOneTimeQuest(
   progress: QuestProgress,
   questId: QuestId,
   definitions?: QuestDefinition[],
 ): QuestProgress {
   const definition = findQuestDefinition(questId, definitions);
-  if (!definition || questId === "daily-check-in" || questId === "connect-wallet") {
+  if (!definition || questId === "daily-check-in") {
     return progress;
   }
 
@@ -402,10 +383,6 @@ export function performQuestAction(
 ): QuestProgress {
   if (questId === "daily-check-in") {
     return performDailyCheckIn(progress, today, definitions);
-  }
-
-  if (questId === "connect-wallet") {
-    return completeConnectWalletQuest(progress, definitions);
   }
 
   return completeOneTimeQuest(progress, questId, definitions);

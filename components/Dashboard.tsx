@@ -9,6 +9,7 @@ import { useQuestEngine } from "@/hooks/useQuestEngine";
 import { getLevel } from "@/lib/levels";
 import type { QuestId } from "@/lib/quest-engine";
 import { ui } from "@/lib/ui-styles";
+import { useRouter } from "next/navigation";
 
 function DashboardSkeleton() {
   return (
@@ -43,6 +44,7 @@ function DashboardSkeleton() {
 }
 
 export default function Dashboard() {
+  const router = useRouter();
   const {
     hydrated,
     quests,
@@ -50,7 +52,6 @@ export default function Dashboard() {
     totalXp,
     levelUpLevel,
     clearLevelUpCelebration,
-    isWalletQuestCompleted,
     handleQuestAction,
   } = useQuestEngine();
 
@@ -130,10 +131,14 @@ export default function Dashboard() {
                   reward={quest.reward}
                   status={quest.status}
                   ctaLabel={quest.ctaLabel}
-                  questCompleted={
-                    quest.id === "connect-wallet" ? isWalletQuestCompleted : false
-                  }
-                  onAction={() => handleQuestAction(quest.id as QuestId)}
+                  onAction={() => {
+                    if (quest.id === "view-leaderboard") {
+                      router.push("/leaderboard");
+                      return;
+                    }
+
+                    handleQuestAction(quest.id as QuestId);
+                  }}
                 />
               ))}
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import PageShell from "@/components/PageShell";
+import { useQuestEngine } from "@/hooks/useQuestEngine";
 import {
   getCurrentUserRank,
   getLeaderboard,
@@ -8,7 +9,7 @@ import {
   type LeaderboardEntry,
 } from "@/lib/supabase/leaderboard";
 import { formatWalletAddress, ui } from "@/lib/ui-styles";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAccount } from "wagmi";
 
 type LeaderboardState =
@@ -192,6 +193,8 @@ function PodiumSection({ entries, normalizedWalletAddress }: PodiumProps) {
 
 export default function LeaderboardPage() {
   const { address } = useAccount();
+  const { hydrated, progressReady, quests, handleQuestAction } = useQuestEngine();
+  const hasCompletedViewLeaderboard = useRef(false);
   const [leaderboardState, setLeaderboardState] = useState<LeaderboardState>({
     status: "loading",
   });
@@ -230,6 +233,23 @@ export default function LeaderboardPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!hydrated || !progressReady || hasCompletedViewLeaderboard.current) {
+      return;
+    }
+
+    const viewLeaderboardQuest = quests.find(
+      (quest) => quest.id === "view-leaderboard",
+    );
+
+    if (!viewLeaderboardQuest || viewLeaderboardQuest.status !== "available") {
+      return;
+    }
+
+    hasCompletedViewLeaderboard.current = true;
+    handleQuestAction("view-leaderboard");
+  }, [hydrated, progressReady, quests, handleQuestAction]);
 
   const normalizedWalletAddress = useMemo(
     () => normalizeWalletAddress(address),

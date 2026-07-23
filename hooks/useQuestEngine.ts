@@ -2,7 +2,6 @@
 
 import {
   buildQuestDefinitionsFromCatalog,
-  completeConnectWalletQuest,
   getDefaultProgress,
   getProgressStats,
   getQuestViewModels,
@@ -41,6 +40,7 @@ export function useQuestEngine() {
   const [questDefinitions, setQuestDefinitions] =
     useState<QuestDefinition[]>(QUEST_DEFINITIONS);
   const [hydrated, setHydrated] = useState(false);
+  const [progressReady, setProgressReady] = useState(false);
   const [levelUpLevel, setLevelUpLevel] = useState<number | null>(null);
   const { address, status: walletStatus } = useAccount();
   const isWalletConnected = walletStatus === "connected";
@@ -51,6 +51,10 @@ export function useQuestEngine() {
   useEffect(() => {
     setHydrated(true);
   }, []);
+
+  useEffect(() => {
+    setProgressReady(false);
+  }, [storageWalletAddress, isWalletConnected]);
 
   useEffect(() => {
     if (!hydrated || isWalletReconnecting) {
@@ -70,6 +74,7 @@ export function useQuestEngine() {
     });
     console.log("SET_PROGRESS_LINE_71");
     setProgress(next);
+    setProgressReady(true);
   }, [
     hydrated,
     storageWalletAddress,
@@ -116,8 +121,7 @@ export function useQuestEngine() {
           return;
         }
 
-        let next = normalizeStreak(userRowToProgress(user));
-        next = completeConnectWalletQuest(next, questDefinitions);
+        const next = normalizeStreak(userRowToProgress(user));
 
         if (cancelled) {
           return;
@@ -130,6 +134,7 @@ export function useQuestEngine() {
         });
         console.log("SET_PROGRESS_LINE_130");
         setProgress(next);
+        setProgressReady(true);
 
         try {
           await saveUserProgress(walletAddress, next);
@@ -144,12 +149,7 @@ export function useQuestEngine() {
           return;
         }
 
-        const fallback = normalizeStreak(
-          completeConnectWalletQuest(
-            loadProgress(storageWalletAddress),
-            questDefinitions,
-          ),
-        );
+        const fallback = normalizeStreak(loadProgress(storageWalletAddress));
         console.log("SET_PROGRESS", "line 139", {
           lastCheckInDate: fallback.lastCheckInDate,
           totalXp: fallback.totalXp,
@@ -157,6 +157,7 @@ export function useQuestEngine() {
         });
         console.log("SET_PROGRESS_LINE_155");
         setProgress(fallback);
+        setProgressReady(true);
         cacheProgressLocally(fallback, storageWalletAddress);
       }
     }
@@ -170,7 +171,6 @@ export function useQuestEngine() {
     hydrated,
     address,
     isWalletConnected,
-    questDefinitions,
     storageWalletAddress,
   ]);
 
@@ -231,18 +231,15 @@ export function useQuestEngine() {
     [progress, questDefinitions],
   );
   const progressStats = useMemo(() => getProgressStats(progress), [progress]);
-  const isWalletQuestCompleted = progress.completedQuestIds.includes(
-    "connect-wallet",
-  );
 
   return {
     hydrated,
+    progressReady,
     quests,
     progressStats,
     totalXp: progress.totalXp,
     levelUpLevel,
     clearLevelUpCelebration: () => setLevelUpLevel(null),
-    isWalletQuestCompleted,
     handleQuestAction,
   };
 }
