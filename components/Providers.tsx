@@ -147,7 +147,6 @@ export default function Providers({ children }: ProvidersProps) {
 
   return (
     <WagmiProvider key={host} config={config} reconnectOnMount>
-      <WalletDebugLogger host={host} />
       <QueryClientProvider client={queryClient}>
         <OnchainKitProvider
           apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
@@ -160,6 +159,7 @@ export default function Providers({ children }: ProvidersProps) {
             },
           }}
         >
+          <WalletDebugLogger host={host} />
           {children}
         </OnchainKitProvider>
       </QueryClientProvider>
