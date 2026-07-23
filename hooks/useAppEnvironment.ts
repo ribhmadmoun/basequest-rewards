@@ -10,6 +10,7 @@ const BROWSER_ENVIRONMENT: AppEnvironment = {
   isMiniApp: false,
   isBaseApp: false,
   isFarcasterClient: false,
+  hasMiniAppWallet: false,
   clientFid: null,
 };
 
@@ -44,5 +45,6 @@ export function useAppEnvironment() {
     isMiniApp: environment.isMiniApp,
     isBaseApp: environment.isBaseApp,
     isFarcasterClient: environment.isFarcasterClient,
+    hasMiniAppWallet: environment.hasMiniAppWallet,
   };
 }
