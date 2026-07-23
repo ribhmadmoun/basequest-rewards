@@ -1,8 +1,5 @@
 import type { Connector } from "wagmi";
-import {
-  BASE_ACCOUNT_CONNECTOR_ID,
-  FARCASTER_MINI_APP_CONNECTOR_ID,
-} from "@/lib/miniapp/constants";
+import { FARCASTER_MINI_APP_CONNECTOR_ID } from "@/lib/miniapp/constants";
 import type { AppEnvironment } from "@/lib/miniapp/environment";
 
 function findConnector(
@@ -24,25 +21,6 @@ function getFarcasterMiniAppConnector(
   );
 }
 
-function getBaseAppConnector(
-  connectors: readonly Connector[],
-): Connector | undefined {
-  return (
-    findConnector(
-      connectors,
-      (connector) =>
-        connector.id === BASE_ACCOUNT_CONNECTOR_ID ||
-        connector.type === "baseAccount",
-    ) ??
-    findConnector(
-      connectors,
-      (connector) =>
-        connector.id === "coinbaseWalletSDK" ||
-        connector.id === "coinbaseWallet",
-    )
-  );
-}
-
 function getBrowserConnector(
   connectors: readonly Connector[],
 ): Connector | undefined {
@@ -59,21 +37,18 @@ function getBrowserConnector(
 }
 
 /**
- * Connector preference:
- * - Base App Mini App host → Base Account / Coinbase Wallet (never injected, never Farcaster bridge)
- * - Farcaster Mini App → official Farcaster Mini App connector
- * - Browser → injected → Coinbase → WalletConnect
+ * Prefers the official Farcaster Mini App connector inside Mini App hosts.
+ * Never auto-selects `injected` inside Mini Apps.
+ * Browser keeps the existing injected → Coinbase → WalletConnect order.
  */
 export function getPreferredConnector(
   connectors: readonly Connector[],
   environment: AppEnvironment,
 ): Connector | undefined {
-  if (environment.isBaseApp) {
-    return getBaseAppConnector(connectors);
-  }
+  const farcasterConnector = getFarcasterMiniAppConnector(connectors);
 
   if (environment.isMiniApp) {
-    return getFarcasterMiniAppConnector(connectors);
+    return farcasterConnector;
   }
 
   return getBrowserConnector(connectors);
