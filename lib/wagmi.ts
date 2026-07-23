@@ -1,5 +1,10 @@
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
-import { createConfig, http } from "wagmi";
+import {
+  cookieStorage,
+  createConfig,
+  createStorage,
+  http,
+} from "wagmi";
 import { base } from "wagmi/chains";
 import {
   baseAccount,
@@ -10,6 +15,10 @@ import {
 
 export const wagmiConfig = createConfig({
   ssr: true,
+  // Persist connection so refresh restores the wallet (reconnectOnMount defaults to true on WagmiProvider).
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
   chains: [base],
   connectors: [
     // Farcaster Mini App clients only.
