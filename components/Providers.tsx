@@ -1,22 +1,18 @@
 "use client";
 
 import { OnchainKitProvider } from "@coinbase/onchainkit";
-import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { base } from "wagmi/chains";
 import { wagmiConfig } from "@/lib/wagmi";
 import { useState } from "react";
+import { WagmiProvider } from "wagmi";
+import { base } from "wagmi/chains";
 
 type ProvidersProps = {
   children: React.ReactNode;
 };
 
-export default function Providers({
-  children,
-}: ProvidersProps) {
-  const [queryClient] = useState(
-    () => new QueryClient()
-  );
+export default function Providers({ children }: ProvidersProps) {
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <WagmiProvider config={wagmiConfig}>

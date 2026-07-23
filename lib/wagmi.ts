@@ -1,39 +1,28 @@
+import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 import { createConfig, http } from "wagmi";
 import { base } from "wagmi/chains";
 import {
-  injected,
   coinbaseWallet,
+  injected,
   walletConnect,
 } from "wagmi/connectors";
-import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 
 export const wagmiConfig = createConfig({
   ssr: true,
-
-  multiInjectedProviderDiscovery: true,
-
   chains: [base],
-
   connectors: [
-    // Farcaster Mini App connector
+    // Official Farcaster Mini App connector — preferred inside Mini App hosts.
     farcasterMiniApp(),
-
-    // Browser wallets (MetaMask etc.)
+    // Standard browser wallets.
     injected(),
-
-    // Coinbase Wallet / Base Wallet
     coinbaseWallet({
       appName: "BaseQuest Rewards",
     }),
-
-    // WalletConnect fallback
     walletConnect({
-      projectId:
-        process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
       showQrModal: true,
     }),
   ],
-
   transports: {
     [base.id]: http(),
   },

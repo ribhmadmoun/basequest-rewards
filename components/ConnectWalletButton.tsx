@@ -1,7 +1,9 @@
 "use client";
 
+import { useAppEnvironment } from "@/hooks/useAppEnvironment";
+import { detectAppEnvironment } from "@/lib/miniapp/environment";
+import { getPreferredConnector } from "@/lib/wallet/getPreferredConnector";
 import { useAccount, useConnect } from "wagmi";
-import { useEffect } from "react";
 
 type ConnectWalletButtonProps = {
   connectLabel?: string;
@@ -23,22 +25,8 @@ export default function ConnectWalletButton({
   className = "",
 }: ConnectWalletButtonProps) {
   const { isConnected } = useAccount();
-
-  const {
-    connect,
-    connectors,
-    isPending,
-  } = useConnect();
-
-  useEffect(() => {
-    console.log(
-      "Available connectors:",
-      connectors.map((c) => ({
-        id: c.id,
-        name: c.name,
-      })),
-    );
-  }, [connectors]);
+  const { connect, connectors, isPending } = useConnect();
+  const { environment, isReady } = useAppEnvironment();
 
   if (completedLabel && questCompleted) {
     return (
@@ -52,22 +40,19 @@ export default function ConnectWalletButton({
     );
   }
 
-  const handleConnect = () => {
-    const connector =
-      connectors.find((c) => c.id === "injected") ??
-      connectors.find((c) => c.id === "coinbaseWallet") ??
-      connectors.find((c) => c.id === "walletConnect");
+  const handleConnect = async () => {
+    const resolvedEnvironment = isReady
+      ? environment
+      : await detectAppEnvironment();
+
+    const connector = getPreferredConnector(connectors, resolvedEnvironment);
 
     if (!connector) {
       console.error("No connector found");
       return;
     }
 
-    console.log("Connecting with:", connector.name);
-
-    connect({
-      connector,
-    });
+    connect({ connector });
   };
 
   const disabled = isPending || isConnected;
@@ -76,7 +61,9 @@ export default function ConnectWalletButton({
     <button
       type="button"
       disabled={disabled}
-      onClick={handleConnect}
+      onClick={() => {
+        void handleConnect();
+      }}
       className={`${
         disabled ? disabledClassName : buttonClassName
       } ${className}`.trim()}
