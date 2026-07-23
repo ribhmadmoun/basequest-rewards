@@ -1,4 +1,3 @@
-import { sdk } from "@farcaster/miniapp-sdk";
 import { BASE_APP_CLIENT_FID } from "@/lib/miniapp/constants";
 
 export type AppEnvironment = {
@@ -17,6 +16,13 @@ type EthereumProviderFlags = {
 const BROWSER_ENVIRONMENT: AppEnvironment = {
   isMiniApp: false,
   isBaseApp: false,
+  isFarcasterClient: false,
+  clientFid: null,
+};
+
+const BASE_APP_ENVIRONMENT: AppEnvironment = {
+  isMiniApp: true,
+  isBaseApp: true,
   isFarcasterClient: false,
   clientFid: null,
 };
@@ -51,7 +57,7 @@ function readEthereumFlags(
 
 /**
  * Detect Base App / Coinbase Wallet in-app browser from the injected
- * EIP-1193 provider and user-agent signals (not Farcaster clientFid alone).
+ * EIP-1193 provider and user-agent signals.
  */
 export function detectBaseAppFromInjectedProvider(): boolean {
   if (typeof window === "undefined") {
@@ -72,44 +78,68 @@ export function detectBaseAppFromInjectedProvider(): boolean {
 
 /**
  * Detects browser vs Farcaster Mini App vs Base App host.
- * Base App is identified primarily via injected EIP-1193 / Coinbase signals.
+ *
+ * Farcaster is only reported when the host exposes wallet.getEthereumProvider.
+ * The Farcaster SDK module is loaded only after Base App injected detection fails,
+ * so Base App never evaluates that bridge during boot.
  */
 export async function detectAppEnvironment(): Promise<AppEnvironment> {
   if (typeof window === "undefined") {
     return BROWSER_ENVIRONMENT;
   }
 
-  // Prefer Base App injected-provider detection first so we never wait on
-  // the Farcaster SDK bridge (which hangs in Base App post-April 2026).
-  const isBaseAppBrowser = detectBaseAppFromInjectedProvider();
-  if (isBaseAppBrowser) {
-    return {
-      isMiniApp: true,
-      isBaseApp: true,
-      isFarcasterClient: false,
-      clientFid: null,
-    };
+  // Give the injected provider a brief chance to appear after WebView boot.
+  if (!detectBaseAppFromInjectedProvider()) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
   }
+
+  if (detectBaseAppFromInjectedProvider()) {
+    return BASE_APP_ENVIRONMENT;
+  }
+
+  // Lazy-load SDK only when we are not clearly in Base App.
+  const { sdk } = await import("@farcaster/miniapp-sdk");
 
   try {
     const isMiniApp = await withTimeout(sdk.isInMiniApp(), 1000);
     if (!isMiniApp) {
-      return BROWSER_ENVIRONMENT;
+      return detectBaseAppFromInjectedProvider()
+        ? BASE_APP_ENVIRONMENT
+        : BROWSER_ENVIRONMENT;
+    }
+
+    if (detectBaseAppFromInjectedProvider()) {
+      return BASE_APP_ENVIRONMENT;
     }
 
     const context = await withTimeout(sdk.context, 1000);
     const clientFid = context?.client?.clientFid ?? null;
+    const isBaseAppByFid = clientFid === BASE_APP_CLIENT_FID;
 
-    // clientFid is a secondary signal only; injected provider already handled above.
-    const isBaseApp = clientFid === BASE_APP_CLIENT_FID;
+    const capabilities = await withTimeout(sdk.getCapabilities(), 750);
+    const farcasterWalletAvailable =
+      capabilities?.includes("wallet.getEthereumProvider") ?? false;
 
+    // Only a real Farcaster wallet host may use farcasterMiniApp.
+    if (!isBaseAppByFid && farcasterWalletAvailable) {
+      return {
+        isMiniApp: true,
+        isBaseApp: false,
+        isFarcasterClient: true,
+        clientFid,
+      };
+    }
+
+    // Mini App without Farcaster eth provider → Base App style host.
     return {
       isMiniApp: true,
-      isBaseApp,
-      isFarcasterClient: !isBaseApp,
-      clientFid,
+      isBaseApp: true,
+      isFarcasterClient: false,
+      clientFid: isBaseAppByFid ? clientFid : null,
     };
   } catch {
-    return BROWSER_ENVIRONMENT;
+    return detectBaseAppFromInjectedProvider()
+      ? BASE_APP_ENVIRONMENT
+      : BROWSER_ENVIRONMENT;
   }
 }
