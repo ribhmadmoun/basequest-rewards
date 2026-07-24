@@ -206,7 +206,19 @@ export async function doesUserFollowTarget(params: {
       cache: "no-store",
     });
 
-    const json = (await response.json()) as {
+    const responseText = await response.text();
+    const json = (
+      responseText
+        ? (JSON.parse(responseText) as {
+            data?: Array<{ id: string; username?: string }>;
+            meta?: { next_token?: string; result_count?: number };
+            errors?: Array<{ detail?: string; title?: string }>;
+            status?: number;
+            title?: string;
+            detail?: string;
+          })
+        : {}
+    ) as {
       data?: Array<{ id: string; username?: string }>;
       meta?: { next_token?: string; result_count?: number };
       errors?: Array<{ detail?: string; title?: string }>;
@@ -220,10 +232,8 @@ export async function doesUserFollowTarget(params: {
       if (response.status === 404 && page === 0) {
         return false;
       }
-      console.error("[x/api] following list full X API response:", {
-        status: response.status,
-        body: json,
-      });
+      console.error(response.status);
+      console.error(responseText);
       throw new Error(
         json.errors?.[0]?.detail ||
           json.detail ||
