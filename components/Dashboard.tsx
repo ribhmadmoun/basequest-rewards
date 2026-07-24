@@ -1,5 +1,6 @@
 "use client";
 
+import ConnectWithBuilder from "@/components/ConnectWithBuilder";
 import GlassPanel from "@/components/GlassPanel";
 import LevelProgressBar from "@/components/LevelProgressBar";
 import LevelUpCelebration from "@/components/LevelUpCelebration";
@@ -70,39 +71,54 @@ export default function Dashboard() {
             />
           ) : null}
 
-          <section className="text-center sm:text-left">
-            <p className={ui.sectionHeading}>Dashboard</p>
-            <h1 className={ui.pageTitle}>BaseQuest Rewards</h1>
-            <p className={ui.pageSubtitle}>
-              Daily rewards and engagement for the Base ecosystem.
-            </p>
-          </section>
+          {/* Hero + builder card; tighter gap into Your Progress */}
+          <div className="flex flex-col gap-8 sm:gap-9 lg:gap-10">
+            <section className="grid grid-cols-1 items-start gap-3 text-center sm:text-left lg:grid-cols-[minmax(0,1.05fr)_minmax(22rem,1.2fr)] lg:gap-6">
+              <div>
+                <p className={ui.sectionHeading}>Dashboard</p>
+                <h1 className={ui.pageTitle}>BaseQuest Rewards</h1>
+                <p className={ui.pageSubtitle}>
+                  Daily rewards and engagement for the Base ecosystem.
+                </p>
 
-          <section>
-            <div className={ui.sectionHeaderWrap}>
-              <p className={ui.sectionHeading}>Overview</p>
-              <h2 className={ui.sectionTitle}>Your Progress</h2>
-            </div>
-
-            <div className={ui.gridStats}>
-              {progressStats.map((stat) => (
-                <article key={stat.label} className={ui.statCard}>
-                  <p className={ui.statLabel}>{stat.label}</p>
-                  <p className={ui.statValue}>{stat.value}</p>
-                </article>
-              ))}
-              <article className={ui.statCard}>
-                <p className={ui.statLabel}>Current Level</p>
-                <div className="mt-auto flex flex-1 flex-col pt-3">
-                  <p className="font-sans text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl">
-                    Level {getLevel(totalXp)}
-                  </p>
-                  <p className="mt-1 text-sm text-white/45">{totalXp} XP</p>
-                  <LevelProgressBar totalXp={totalXp} />
+                {/* Mobile builder card — below description, no extra bottom margin */}
+                <div className="mt-3 lg:hidden">
+                  <ConnectWithBuilder variant="mobile" />
                 </div>
-              </article>
-            </div>
-          </section>
+              </div>
+
+              {/* Desktop builder card — title-aligned, wider fill */}
+              <div className="hidden w-full self-start lg:block lg:mt-[1.65rem]">
+                <ConnectWithBuilder variant="desktop" />
+              </div>
+            </section>
+
+            <section>
+              <div className={ui.sectionHeaderWrap}>
+                <p className={ui.sectionHeading}>Overview</p>
+                <h2 className={ui.sectionTitle}>Your Progress</h2>
+              </div>
+
+              <div className={ui.gridStats}>
+                {progressStats.map((stat) => (
+                  <article key={stat.label} className={ui.statCard}>
+                    <p className={ui.statLabel}>{stat.label}</p>
+                    <p className={ui.statValue}>{stat.value}</p>
+                  </article>
+                ))}
+                <article className={ui.statCard}>
+                  <p className={ui.statLabel}>Current Level</p>
+                  <div className="mt-auto flex flex-1 flex-col pt-3">
+                    <p className="font-sans text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl">
+                      Level {getLevel(totalXp)}
+                    </p>
+                    <p className="mt-1 text-sm text-white/45">{totalXp} XP</p>
+                    <LevelProgressBar totalXp={totalXp} />
+                  </div>
+                </article>
+              </div>
+            </section>
+          </div>
 
           <section>
             <div className={ui.sectionHeaderWrap}>
