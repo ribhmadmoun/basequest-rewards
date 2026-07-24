@@ -1,5 +1,8 @@
 "use client";
 
+import CommunityQuestCards, {
+  filterBuilderQuests,
+} from "@/components/CommunityQuestCards";
 import ConnectWithBuilder from "@/components/ConnectWithBuilder";
 import GlassPanel from "@/components/GlassPanel";
 import LevelProgressBar from "@/components/LevelProgressBar";
@@ -12,6 +15,7 @@ import { getLevel } from "@/lib/levels";
 import type { QuestId } from "@/lib/quest-engine";
 import { ui } from "@/lib/ui-styles";
 import Link from "next/link";
+import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 
 function DashboardSkeleton() {
@@ -56,6 +60,7 @@ export default function Dashboard() {
     levelUpLevel,
     clearLevelUpCelebration,
     handleQuestAction,
+    applyServerProgress,
   } = useQuestEngine();
 
   return (
@@ -154,16 +159,34 @@ export default function Dashboard() {
 
           <section>
             <div className={ui.sectionHeaderWrap}>
-              <p className={ui.sectionHeading}>Quests</p>
-              <h2 className={ui.sectionTitle}>Start Earning</h2>
+              <p className={ui.sectionHeading}>Community</p>
+              <h2 className={ui.sectionTitle}>Community Quests</h2>
               <p className={ui.sectionDescription}>
-                Complete quests to earn XP and stay engaged with the Base
-                ecosystem.
+                Follow BaseQuest Rewards on social and stay connected with the
+                community.
+              </p>
+            </div>
+            <div className={ui.gridCards}>
+              <Suspense fallback={null}>
+                <CommunityQuestCards
+                  quests={quests}
+                  onFollowXCompleted={applyServerProgress}
+                />
+              </Suspense>
+            </div>
+          </section>
+
+          <section>
+            <div className={ui.sectionHeaderWrap}>
+              <p className={ui.sectionHeading}>Builder</p>
+              <h2 className={ui.sectionTitle}>Builder Quests</h2>
+              <p className={ui.sectionDescription}>
+                Complete builder quests to earn XP and grow your streak.
               </p>
             </div>
 
             <div className={ui.gridCards}>
-              {quests.map((quest) => (
+              {filterBuilderQuests(quests).map((quest) => (
                 <QuestCard
                   key={quest.id}
                   questId={quest.id}

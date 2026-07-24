@@ -226,6 +226,23 @@ export function useQuestEngine() {
     [updateProgress, questDefinitions],
   );
 
+  const applyServerProgress = useCallback(
+    (nextProgress: QuestProgress) => {
+      updateProgress((current) => {
+        const previousLevel = getLevel(current.totalXp);
+        const next = normalizeStreak(nextProgress);
+        const newLevel = getLevel(next.totalXp);
+
+        if (newLevel > previousLevel) {
+          setLevelUpLevel(newLevel);
+        }
+
+        return next;
+      });
+    },
+    [updateProgress],
+  );
+
   const quests = useMemo(
     () => getQuestViewModels(progress, questDefinitions),
     [progress, questDefinitions],
@@ -241,5 +258,6 @@ export function useQuestEngine() {
     levelUpLevel,
     clearLevelUpCelebration: () => setLevelUpLevel(null),
     handleQuestAction,
+    applyServerProgress,
   };
 }

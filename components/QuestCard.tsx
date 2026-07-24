@@ -1,7 +1,15 @@
 "use client";
 
+import {
+  cloneElement,
+  isValidElement,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import DailyCheckInQuestButton from "@/components/DailyCheckInQuestButton";
+import FollowXQuestButton from "@/components/FollowXQuestButton";
 import GlassPanel from "@/components/GlassPanel";
+import type { QuestProgress } from "@/lib/quest-engine";
 import { ui } from "@/lib/ui-styles";
 
 export type QuestStatus = "available" | "completed" | "locked";
@@ -14,6 +22,14 @@ type QuestCardProps = {
   status: QuestStatus;
   ctaLabel: string;
   onAction?: () => void;
+  /** Apply verified server progress (e.g. X follow quest). */
+  onServerProgress?: (progress: QuestProgress) => void;
+  /** Optional leading icon (e.g. social marks for community quests). */
+  icon?: ReactNode;
+  /** Optional frequency badge, e.g. "One-Time". */
+  frequencyLabel?: string;
+  /** When set, CTA opens this URL in a new tab instead of calling onAction. */
+  externalHref?: string;
 };
 
 const statusLabels: Record<QuestStatus, string> = {
@@ -35,6 +51,14 @@ function getCtaButtonClassName(isActionable: boolean) {
     : `${ui.secondaryButton} opacity-70 cursor-not-allowed`;
 }
 
+function duplicateIcon(icon: ReactNode): ReactNode {
+  if (isValidElement(icon)) {
+    return cloneElement(icon as ReactElement);
+  }
+
+  return icon;
+}
+
 export default function QuestCard({
   questId,
   title,
@@ -43,25 +67,42 @@ export default function QuestCard({
   status,
   ctaLabel,
   onAction,
+  onServerProgress,
+  icon,
+  frequencyLabel,
+  externalHref,
 }: QuestCardProps) {
   const isActionable = status === "available";
   const isDailyCheckInQuest = questId === "daily-check-in";
+  const isFollowXQuest = questId === "follow-x";
 
   return (
     <GlassPanel interactive className="flex h-full flex-col p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
-        <span
-          className={`rounded-badge border px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest sm:px-3 sm:text-[0.65rem] ${statusBadgeStyles[status]}`}
-        >
-          {statusLabels[status]}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`rounded-badge border px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest sm:px-3 sm:text-[0.65rem] ${statusBadgeStyles[status]}`}
+          >
+            {statusLabels[status]}
+          </span>
+          {frequencyLabel ? (
+            <span className="rounded-badge border border-white/12 bg-white/[0.04] px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-widest text-white/55 sm:px-3 sm:text-[0.65rem]">
+              {frequencyLabel}
+            </span>
+          ) : null}
+        </div>
         <span className="shrink-0 rounded-badge border border-base-blue/40 bg-gradient-to-r from-base-blue/80 to-indigo-600/80 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-white sm:px-3 sm:text-xs">
           {reward}
         </span>
       </div>
 
-      <h3 className="mt-3.5 font-sans text-base font-semibold tracking-tight text-white sm:mt-4 sm:text-lg">
-        {title}
+      <h3 className="mt-3.5 flex items-center gap-2.5 font-sans text-base font-semibold tracking-tight text-white sm:mt-4 sm:text-lg">
+        {icon ? (
+          <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-cyan-100/90">
+            {icon}
+          </span>
+        ) : null}
+        <span>{title}</span>
       </h3>
       <p className="mt-2 flex-1 text-sm leading-6 text-white/55 sm:leading-7">
         {description}
@@ -76,6 +117,23 @@ export default function QuestCard({
             disabledClassName={getCtaButtonClassName(false)}
             onSuccess={onAction}
           />
+        ) : isFollowXQuest && onServerProgress ? (
+          <FollowXQuestButton
+            status={status}
+            buttonClassName={getCtaButtonClassName(true)}
+            disabledClassName={getCtaButtonClassName(false)}
+            onCompleted={onServerProgress}
+          />
+        ) : externalHref ? (
+          <a
+            href={externalHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${getCtaButtonClassName(true)} inline-flex w-full items-center justify-center gap-2`}
+          >
+            {duplicateIcon(icon)}
+            {ctaLabel}
+          </a>
         ) : (
           <button
             type="button"

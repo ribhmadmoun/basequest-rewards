@@ -18,9 +18,14 @@ import { logSupabaseError } from "@/lib/supabase/errors";
  *   streak integer not null default 0,
  *   last_checkin date,
  *   completed_quests jsonb not null default '[]'::jsonb,
+ *   x_user_id text,
+ *   x_username text,
  *   created_at timestamptz not null default now(),
  *   updated_at timestamptz not null default now()
  * );
+ *
+ * alter table users add column if not exists x_user_id text;
+ * alter table users add column if not exists x_username text;
  */
 export type UserRow = {
   id: string;
@@ -29,6 +34,8 @@ export type UserRow = {
   streak: number;
   last_checkin: string | null;
   completed_quests: QuestId[] | string[] | null;
+  x_user_id?: string | null;
+  x_username?: string | null;
 };
 
 function normalizeWalletAddress(walletAddress: string) {
@@ -133,6 +140,42 @@ export async function saveUserProgress(
   if (error) {
     logSupabaseError("saveUserProgress", "update", error, {
       walletAddress: normalizedAddress,
+    });
+    throw error;
+  }
+}
+
+export async function linkXAccountToWallet(
+  walletAddress: string,
+  account: { xUserId: string; xUsername: string },
+): Promise<void> {
+  const normalizedAddress = normalizeWalletAddress(walletAddress);
+
+  // Ensure the user row exists before linking.
+  await fetchOrCreateUser(normalizedAddress);
+
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    const configError = new Error("Supabase is not configured");
+    logSupabaseError("linkXAccountToWallet", "client unavailable", configError, {
+      walletAddress: normalizedAddress,
+    });
+    throw configError;
+  }
+
+  const { error } = await supabase
+    .from("users")
+    .update({
+      x_user_id: account.xUserId,
+      x_username: account.xUsername,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("wallet_address", normalizedAddress);
+
+  if (error) {
+    logSupabaseError("linkXAccountToWallet", "update", error, {
+      walletAddress: normalizedAddress,
+      xUserId: account.xUserId,
     });
     throw error;
   }

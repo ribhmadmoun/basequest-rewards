@@ -2,14 +2,23 @@ export type QuestId =
   | "daily-check-in"
   | "view-leaderboard"
   | "build-streak"
-  | "explore-base";
+  | "explore-base"
+  | "follow-x";
 
 const QUEST_IDS: QuestId[] = [
   "daily-check-in",
   "view-leaderboard",
   "build-streak",
   "explore-base",
+  "follow-x",
 ];
+
+/** Quests shown in Community section (excluded from Builder lists). */
+export const COMMUNITY_ENGINE_QUEST_IDS: QuestId[] = ["follow-x"];
+
+export function isCommunityEngineQuest(questId: QuestId): boolean {
+  return COMMUNITY_ENGINE_QUEST_IDS.includes(questId);
+}
 
 export function parseQuestIds(ids: unknown): QuestId[] {
   if (!Array.isArray(ids)) {
@@ -69,6 +78,10 @@ const QUEST_ENGINE_METADATA: Record<
     prerequisites: ["daily-check-in"],
     ctaAvailable: "Explore Apps",
   },
+  "follow-x": {
+    prerequisites: [],
+    ctaAvailable: "Connect X",
+  },
 };
 
 export const QUEST_DEFINITIONS: QuestDefinition[] = [
@@ -103,6 +116,14 @@ export const QUEST_DEFINITIONS: QuestDefinition[] = [
     rewardXp: 15,
     ...QUEST_ENGINE_METADATA["explore-base"],
   },
+  {
+    id: "follow-x",
+    title: "Follow us on X",
+    description:
+      "Follow @bqrbase on X to stay updated with BaseQuest Rewards.",
+    rewardXp: 25,
+    ...QUEST_ENGINE_METADATA["follow-x"],
+  },
 ];
 
 function resolveQuestDefinitions(
@@ -127,7 +148,7 @@ function findQuestDefinition(
 export function buildQuestDefinitionsFromCatalog(
   rows: QuestCatalogRow[],
 ): QuestDefinition[] {
-  const definitions: QuestDefinition[] = [];
+  const fromCatalog = new Map<QuestId, QuestDefinition>();
 
   for (const row of rows) {
     if (!QUEST_IDS.includes(row.id as QuestId)) {
@@ -137,7 +158,7 @@ export function buildQuestDefinitionsFromCatalog(
     const questId = row.id as QuestId;
     const metadata = QUEST_ENGINE_METADATA[questId];
 
-    definitions.push({
+    fromCatalog.set(questId, {
       id: questId,
       title: row.title,
       description: row.description,
@@ -147,7 +168,10 @@ export function buildQuestDefinitionsFromCatalog(
     });
   }
 
-  return definitions;
+  // Keep local defaults (including community quests) when catalog omits them.
+  return QUEST_DEFINITIONS.map(
+    (definition) => fromCatalog.get(definition.id) ?? definition,
+  );
 }
 
 export function getDefaultProgress(): QuestProgress {
