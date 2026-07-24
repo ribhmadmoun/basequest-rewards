@@ -109,9 +109,26 @@ export async function POST(request: Request) {
       xUsername: session.xUsername,
     });
   } catch (error) {
-    console.error("[x/verify-follow]", error);
+    console.error("[x/verify-follow] exact error:", error);
+    if (error instanceof Error) {
+      console.error("[x/verify-follow] message:", error.message);
+      console.error("[x/verify-follow] stack:", error.stack);
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+
     return NextResponse.json(
-      { error: "verify_failed", status: "error" },
+      {
+        status: "error",
+        error:
+          process.env.NODE_ENV !== "production" ? message : "verify_failed",
+        stack:
+          process.env.NODE_ENV !== "production"
+            ? error instanceof Error
+              ? error.stack
+              : undefined
+            : undefined,
+      },
       { status: 500 },
     );
   }

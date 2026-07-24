@@ -155,9 +155,16 @@ export default function FollowXQuestButton({
         return;
       }
 
-      setErrorMessage("Verification failed. Please try again.");
-    } catch {
-      setErrorMessage("Verification failed. Please try again.");
+      console.error("[FollowXQuestButton] verify-follow failed:", json);
+      setErrorMessage(
+        json.error ||
+          `Verification failed (HTTP ${response.status}). Check server logs.`,
+      );
+    } catch (error) {
+      console.error("[FollowXQuestButton] verify-follow exception:", error);
+      setErrorMessage(
+        error instanceof Error ? error.message : String(error),
+      );
     } finally {
       setIsVerifying(false);
     }
