@@ -135,10 +135,14 @@ export async function fetchTargetXUserId(): Promise<string> {
   };
 
   if (!response.ok || !json.data?.id) {
+    console.error("[x/api] fetchTargetXUserId full X API response:", {
+      status: response.status,
+      body: json,
+    });
     throw new Error(
       json.errors?.[0]?.detail ||
         json.errors?.[0]?.title ||
-        `Failed to resolve @${X_TARGET_USERNAME}`,
+        JSON.stringify(json),
     );
   }
 
@@ -171,6 +175,16 @@ export async function doesUserFollowTarget(params: {
     if (typeof json.data?.following === "boolean") {
       return json.data.following;
     }
+    console.error(
+      "[x/api] relationship probe unexpected X API response:",
+      json,
+    );
+  } else {
+    const body = await relationshipResponse.text();
+    console.error("[x/api] relationship probe full X API response:", {
+      status: relationshipResponse.status,
+      body,
+    });
   }
 
   // Fallback: scan following list for the target account.
@@ -206,11 +220,15 @@ export async function doesUserFollowTarget(params: {
       if (response.status === 404 && page === 0) {
         return false;
       }
+      console.error("[x/api] following list full X API response:", {
+        status: response.status,
+        body: json,
+      });
       throw new Error(
         json.errors?.[0]?.detail ||
           json.detail ||
           json.title ||
-          "Failed to verify X follow relationship",
+          JSON.stringify(json),
       );
     }
 

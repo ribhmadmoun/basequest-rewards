@@ -109,25 +109,15 @@ export async function POST(request: Request) {
       xUsername: session.xUsername,
     });
   } catch (error) {
-    console.error("[x/verify-follow] exact error:", error);
+    console.error("[x/verify-follow] exact exception:", error);
     if (error instanceof Error) {
       console.error("[x/verify-follow] message:", error.message);
       console.error("[x/verify-follow] stack:", error.stack);
     }
 
-    const message = error instanceof Error ? error.message : String(error);
-
     return NextResponse.json(
       {
-        status: "error",
-        error:
-          process.env.NODE_ENV !== "production" ? message : "verify_failed",
-        stack:
-          process.env.NODE_ENV !== "production"
-            ? error instanceof Error
-              ? error.stack
-              : undefined
-            : undefined,
+        error: error instanceof Error ? error.message : String(error),
       },
       { status: 500 },
     );
