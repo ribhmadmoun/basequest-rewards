@@ -3,18 +3,27 @@ import { ui } from "@/lib/ui-styles";
 
 type PageShellProps = {
   children: React.ReactNode;
+  /** @deprecated Analytics canvas is now the app-wide default. */
+  variant?: "default" | "analytics";
 };
 
+/**
+ * App chrome — dark analytics canvas matching Base Wallet Score.
+ */
 export default function PageShell({ children }: PageShellProps) {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-gradient-to-br from-gradient-from via-gradient-via to-gradient-to">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-gradient-to-b from-[#070b18] via-[#0c1430] to-[#101038]">
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-20 top-1/4 size-72 rounded-badge bg-base-blue/20 blur-3xl"
+        className="pointer-events-none absolute -left-24 top-1/4 size-80 rounded-badge bg-base-blue/20 blur-3xl"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-16 bottom-1/3 size-56 rounded-badge bg-glass-bg blur-2xl"
+        className="pointer-events-none absolute -right-20 bottom-1/4 size-72 rounded-badge bg-cyan-400/10 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/3 top-1/2 size-64 rounded-badge bg-indigo-500/10 blur-3xl"
       />
 
       <Header />

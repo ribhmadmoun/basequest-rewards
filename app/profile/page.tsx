@@ -1,5 +1,6 @@
 "use client";
 
+import GlassPanel from "@/components/GlassPanel";
 import LevelProgressBar from "@/components/LevelProgressBar";
 import PageShell from "@/components/PageShell";
 import { getLevel } from "@/lib/levels";
@@ -76,11 +77,11 @@ function ProfileSkeleton() {
     <div className="flex flex-col gap-8 sm:gap-10">
       <article className={`${ui.glassCard} animate-pulse p-5 sm:p-6`}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="size-20 shrink-0 rounded-full bg-glass-border sm:size-24" />
+          <div className="size-20 shrink-0 rounded-full bg-white/10 sm:size-24" />
           <div className="flex-1 space-y-3">
-            <div className="h-6 w-40 rounded bg-glass-border" />
-            <div className="h-4 w-32 rounded bg-glass-border" />
-            <div className="h-2.5 w-full rounded-badge bg-glass-border" />
+            <div className="h-6 w-40 rounded bg-white/10" />
+            <div className="h-4 w-32 rounded bg-white/10" />
+            <div className="h-2.5 w-full rounded-badge bg-white/10" />
           </div>
         </div>
       </article>
@@ -89,10 +90,10 @@ function ProfileSkeleton() {
         {Array.from({ length: 4 }, (_, index) => (
           <article
             key={index}
-            className={`${ui.glassCard} min-h-[8.5rem] animate-pulse p-5 sm:p-6`}
+            className={`${ui.glassCard} min-h-[9rem] animate-pulse p-5 sm:p-6`}
           >
-            <div className="h-4 w-20 rounded bg-glass-border" />
-            <div className="mt-4 h-8 w-14 rounded bg-glass-border" />
+            <div className="h-4 w-20 rounded bg-white/10" />
+            <div className="mt-4 h-8 w-14 rounded bg-white/10" />
           </article>
         ))}
       </div>
@@ -175,12 +176,12 @@ export default function ProfilePage() {
       </section>
 
       {!normalizedWalletAddress ? (
-        <article className={ui.messageCard}>
+        <GlassPanel className="p-6 text-center sm:p-8">
           <p className={ui.messageTitle}>Connect your wallet</p>
-          <p className="mt-2 text-sm text-text-muted">
+          <p className="mt-2 text-sm text-white/45">
             Connect your wallet to view your profile and progress.
           </p>
-        </article>
+        </GlassPanel>
       ) : null}
 
       {normalizedWalletAddress && profileState.status === "loading" ? (
@@ -188,22 +189,22 @@ export default function ProfilePage() {
       ) : null}
 
       {normalizedWalletAddress && profileState.status === "error" ? (
-        <article className={ui.messageCard}>
+        <GlassPanel className="p-6 text-center sm:p-8">
           <p className={ui.messageTitle}>Unable to load profile</p>
-          <p className="mt-2 text-sm text-text-muted">
+          <p className="mt-2 text-sm text-white/45">
             Please try again in a moment.
           </p>
-        </article>
+        </GlassPanel>
       ) : null}
 
       {normalizedWalletAddress && profileState.status === "ready" ? (
         <>
           <section>
-            <article className={`${ui.glassCard} p-5 sm:p-6`}>
+            <GlassPanel className="p-5 sm:p-6">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-6">
                 <div
                   aria-hidden
-                  className="mx-auto flex size-20 shrink-0 items-center justify-center rounded-full border border-glass-border bg-gradient-to-br from-base-blue to-gradient-to text-xl font-bold text-text-primary shadow-[0_0_24px_rgba(0,82,255,0.35)] sm:mx-0 sm:size-24 sm:text-2xl"
+                  className="mx-auto flex size-20 shrink-0 items-center justify-center rounded-full border border-cyan-200/25 bg-gradient-to-br from-base-blue via-indigo-600 to-violet-700 text-xl font-bold text-white shadow-[0_0_24px_rgba(0,82,255,0.4)] sm:mx-0 sm:size-24 sm:text-2xl"
                 >
                   {getWalletAvatarLabel(profileState.profile.wallet_address)}
                 </div>
@@ -211,12 +212,12 @@ export default function ProfilePage() {
                 <div className="min-w-0 flex-1 text-center sm:text-left">
                   <p className={ui.sectionHeading}>Connected Wallet</p>
                   <p
-                    className="mt-1.5 truncate font-mono text-lg font-semibold tracking-wide text-text-primary sm:text-xl"
+                    className="mt-1.5 truncate font-mono text-lg font-semibold tracking-wide text-white sm:text-xl"
                     title={profileState.profile.wallet_address}
                   >
                     {formatWalletAddress(profileState.profile.wallet_address)}
                   </p>
-                  <p className="mt-1.5 text-sm text-text-muted">
+                  <p className="mt-1.5 text-sm text-white/45">
                     Member since{" "}
                     {formatMemberSince(profileState.profile.created_at)}
                   </p>
@@ -234,14 +235,14 @@ export default function ProfilePage() {
                   aria-live="polite"
                   className={`shrink-0 self-center rounded-badge border px-3 py-2 text-[0.65rem] font-semibold uppercase tracking-widest transition-all duration-200 sm:self-start sm:px-4 ${
                     copied
-                      ? "border-emerald-400/50 bg-emerald-500/20 text-text-primary shadow-[0_0_12px_rgba(16,185,129,0.35)]"
-                      : "border-glass-border bg-glass-bg text-text-primary hover:border-white/30 hover:bg-white/10"
+                      ? "border-emerald-400/50 bg-emerald-500/20 text-emerald-100 shadow-[0_0_12px_rgba(16,185,129,0.35)]"
+                      : "border-white/12 bg-white/[0.04] text-white hover:border-white/20 hover:bg-white/[0.08]"
                   }`}
                 >
                   {copied ? "Copied!" : "Copy"}
                 </button>
               </div>
-            </article>
+            </GlassPanel>
           </section>
 
           <section>
@@ -252,24 +253,24 @@ export default function ProfilePage() {
 
             <div className={ui.gridStats}>
               <article className={ui.statCard}>
-                <p className={ui.statLabel}>⭐ Total XP</p>
+                <p className={ui.statLabel}>Total XP</p>
                 <p className={ui.statValue}>{profileState.profile.total_xp}</p>
               </article>
               <article className={ui.statCard}>
-                <p className={ui.statLabel}>🎯 Current Level</p>
+                <p className={ui.statLabel}>Current Level</p>
                 <div className="mt-auto flex flex-col pt-3">
-                  <p className="font-sans text-2xl font-bold tabular-nums tracking-tight text-text-primary sm:text-3xl">
+                  <p className="font-sans text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl">
                     Level {getLevel(profileState.profile.total_xp)}
                   </p>
                   <LevelProgressBar totalXp={profileState.profile.total_xp} />
                 </div>
               </article>
               <article className={ui.statCard}>
-                <p className={ui.statLabel}>🔥 Streak</p>
+                <p className={ui.statLabel}>Streak</p>
                 <p className={ui.statValue}>{profileState.profile.streak}</p>
               </article>
               <article className={ui.statCard}>
-                <p className={ui.statLabel}>🏆 Rank</p>
+                <p className={ui.statLabel}>Rank</p>
                 <p className={ui.statValue}>
                   {profileState.rank ? `#${profileState.rank}` : "—"}
                 </p>
@@ -279,7 +280,7 @@ export default function ProfilePage() {
 
           <section>
             <div className={ui.sectionHeaderWrap}>
-              <p className={ui.sectionHeading}>Badges</p>
+              <p className={ui.sectionHeading}>Milestones</p>
               <h2 className={ui.sectionTitle}>Achievements</h2>
             </div>
 
@@ -290,21 +291,21 @@ export default function ProfilePage() {
                 return (
                   <article
                     key={badge.id}
-                    className={`flex min-h-[6.5rem] flex-col items-center justify-center rounded-card border p-4 text-center shadow-lg shadow-black/10 backdrop-blur-xl transition-all duration-200 sm:min-h-[7rem] sm:p-5 ${
+                    className={`relative flex min-h-[6.5rem] flex-col items-center justify-center overflow-hidden rounded-2xl border p-4 text-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 sm:min-h-[7rem] sm:p-5 ${
                       unlocked
-                        ? "border-base-blue/50 bg-base-blue/15 hover:border-base-blue/70 hover:shadow-[0_0_16px_rgba(0,82,255,0.25)]"
-                        : "border-glass-border bg-glass-bg/60 opacity-60 hover:opacity-75"
+                        ? "border-white/14 bg-white/[0.05] hover:border-violet-300/30 hover:bg-white/[0.07]"
+                        : "border-white/[0.06] bg-white/[0.02] opacity-50 hover:opacity-70"
                     }`}
                   >
-                    <span className="text-lg sm:text-xl" aria-hidden>
-                      {unlocked ? "🏅" : "🔒"}
-                    </span>
                     <p
-                      className={`mt-2 text-[0.6rem] font-semibold uppercase tracking-widest sm:text-[0.65rem] ${
-                        unlocked ? "text-text-primary" : "text-text-muted"
+                      className={`text-[0.6rem] font-semibold uppercase tracking-[0.16em] sm:text-[0.65rem] ${
+                        unlocked ? "text-white/85" : "text-white/40"
                       }`}
                     >
                       {badge.label}
+                    </p>
+                    <p className="mt-3 text-[0.55rem] font-semibold uppercase tracking-widest text-white/45">
+                      {unlocked ? "Unlocked" : "Locked"}
                     </p>
                   </article>
                 );
@@ -318,9 +319,9 @@ export default function ProfilePage() {
               <h2 className={ui.sectionTitle}>Completed Quests</h2>
             </div>
 
-            <article className={`${ui.glassCard} p-4 sm:p-5`}>
+            <GlassPanel secondary className="p-4 sm:p-5">
               {profileState.profile.completed_quests.length === 0 ? (
-                <p className="py-6 text-center text-sm text-text-muted sm:py-8 sm:text-base">
+                <p className="py-6 text-center text-sm text-white/45 sm:py-8 sm:text-base">
                   No completed quests yet. Start earning on the dashboard.
                 </p>
               ) : (
@@ -328,22 +329,22 @@ export default function ProfilePage() {
                   {profileState.profile.completed_quests.map((questId) => (
                     <li
                       key={questId}
-                      className="flex items-center gap-3 rounded-card border border-glass-border bg-white/[0.04] px-3 py-3 transition-all hover:border-white/20 hover:bg-white/[0.06] sm:gap-4 sm:px-4 sm:py-3.5"
+                      className={`flex items-center gap-3 px-3 py-3 sm:gap-4 sm:px-4 sm:py-3.5 ${ui.glassRow}`}
                     >
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-base-blue/40 bg-base-blue/20 text-sm font-bold text-text-primary sm:size-9">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-cyan-300/35 bg-cyan-500/15 text-sm font-bold text-cyan-100 sm:size-9">
                         ✓
                       </span>
-                      <span className="min-w-0 flex-1 text-sm font-medium text-text-primary sm:text-base">
+                      <span className="min-w-0 flex-1 text-sm font-medium text-white sm:text-base">
                         {getQuestName(questId)}
                       </span>
-                      <span className="shrink-0 rounded-badge border border-glass-border bg-glass-bg px-2 py-0.5 text-[0.55rem] font-semibold uppercase tracking-widest text-text-secondary sm:text-[0.6rem]">
+                      <span className="shrink-0 rounded-badge border border-emerald-400/35 bg-emerald-500/15 px-2 py-0.5 text-[0.55rem] font-semibold uppercase tracking-widest text-emerald-100 sm:text-[0.6rem]">
                         Done
                       </span>
                     </li>
                   ))}
                 </ul>
               )}
-            </article>
+            </GlassPanel>
           </section>
         </>
       ) : null}

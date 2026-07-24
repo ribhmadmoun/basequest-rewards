@@ -1,5 +1,6 @@
 "use client";
 
+import GlassPanel from "@/components/GlassPanel";
 import LevelProgressBar from "@/components/LevelProgressBar";
 import LevelUpCelebration from "@/components/LevelUpCelebration";
 import PageShell from "@/components/PageShell";
@@ -9,34 +10,35 @@ import { useQuestEngine } from "@/hooks/useQuestEngine";
 import { getLevel } from "@/lib/levels";
 import type { QuestId } from "@/lib/quest-engine";
 import { ui } from "@/lib/ui-styles";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 function DashboardSkeleton() {
   return (
     <>
       <section className="animate-pulse space-y-3">
-        <div className="mx-auto h-3 w-20 rounded bg-glass-border sm:mx-0" />
-        <div className="mx-auto h-8 w-56 rounded bg-glass-border sm:mx-0" />
-        <div className="mx-auto h-4 w-72 max-w-full rounded bg-glass-border sm:mx-0" />
+        <div className="mx-auto h-3 w-20 rounded bg-white/10 sm:mx-0" />
+        <div className="mx-auto h-8 w-56 rounded bg-white/10 sm:mx-0" />
+        <div className="mx-auto h-4 w-72 max-w-full rounded bg-white/10 sm:mx-0" />
       </section>
 
       <section className={ui.gridStats}>
         {Array.from({ length: 4 }, (_, index) => (
           <div
             key={index}
-            className={`${ui.glassCard} min-h-[8.5rem] animate-pulse p-5 sm:p-6`}
+            className={`${ui.glassCard} min-h-[9rem] animate-pulse p-5 sm:p-6`}
           >
-            <div className="h-3 w-24 rounded bg-glass-border" />
-            <div className="mt-auto pt-6 h-8 w-16 rounded bg-glass-border" />
+            <div className="h-3 w-24 rounded bg-white/10" />
+            <div className="mt-auto h-8 w-16 rounded bg-white/10 pt-6" />
           </div>
         ))}
       </section>
 
       <section className={`${ui.glassCard} animate-pulse p-5 sm:p-6`}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="h-12 rounded bg-glass-border" />
-          <div className="h-12 rounded bg-glass-border" />
-          <div className="h-12 rounded bg-glass-border" />
+          <div className="h-12 rounded bg-white/10" />
+          <div className="h-12 rounded bg-white/10" />
+          <div className="h-12 rounded bg-white/10" />
         </div>
       </section>
     </>
@@ -92,10 +94,10 @@ export default function Dashboard() {
               <article className={ui.statCard}>
                 <p className={ui.statLabel}>Current Level</p>
                 <div className="mt-auto flex flex-1 flex-col pt-3">
-                  <p className="font-sans text-2xl font-bold tabular-nums tracking-tight text-text-primary sm:text-3xl">
+                  <p className="font-sans text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl">
                     Level {getLevel(totalXp)}
                   </p>
-                  <p className="mt-1 text-sm text-text-muted">{totalXp} XP</p>
+                  <p className="mt-1 text-sm text-white/45">{totalXp} XP</p>
                   <LevelProgressBar totalXp={totalXp} />
                 </div>
               </article>
@@ -109,6 +111,29 @@ export default function Dashboard() {
             </div>
 
             <WalletStatusCard />
+          </section>
+
+          <section>
+            <div className={ui.sectionHeaderWrap}>
+              <p className={ui.sectionHeading}>Analytics</p>
+              <h2 className={ui.sectionTitle}>Base Wallet Score</h2>
+            </div>
+
+            <Link href="/base-wallet-score" className="block">
+              <GlassPanel interactive className="p-5 sm:p-6">
+                <p className={ui.statLabel}>BaseQuest 2.0</p>
+                <p className="mt-2 font-sans text-xl font-bold tracking-tight text-white sm:text-2xl">
+                  Base Wallet Score
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-white/55 sm:text-base">
+                  Open your premium Base wallet analytics dashboard — score,
+                  portfolio, activity, and insights.
+                </p>
+                <span className={`mt-4 inline-flex ${ui.secondaryButton}`}>
+                  View Score
+                </span>
+              </GlassPanel>
+            </Link>
           </section>
 
           <section>

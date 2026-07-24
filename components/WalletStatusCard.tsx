@@ -1,6 +1,7 @@
 "use client";
 
 import ConnectWalletButton from "@/components/ConnectWalletButton";
+import GlassPanel from "@/components/GlassPanel";
 import { formatWalletAddress, ui } from "@/lib/ui-styles";
 import { useAccount, useDisconnect } from "wagmi";
 
@@ -11,11 +12,11 @@ export default function WalletStatusCard() {
   const isConnected = status === "connected";
 
   return (
-    <article className={`${ui.glassCardInteractive} p-5 sm:p-6`}>
+    <GlassPanel interactive className="p-5 sm:p-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
         <div>
           <p className={ui.statLabel}>Connection Status</p>
-          <p className="mt-2 font-sans text-lg font-semibold text-text-primary">
+          <p className="mt-2 font-sans text-lg font-semibold text-white">
             {isConnected ? "Connected" : "Disconnected"}
           </p>
         </div>
@@ -23,7 +24,7 @@ export default function WalletStatusCard() {
         <div>
           <p className={ui.statLabel}>Wallet Address</p>
           <p
-            className="mt-2 truncate font-mono text-base font-semibold tracking-wide text-text-primary sm:text-lg"
+            className="mt-2 truncate font-mono text-base font-semibold tracking-wide text-white sm:text-lg"
             title={address ?? undefined}
           >
             {isConnected && address ? formatWalletAddress(address) : "—"}
@@ -32,13 +33,11 @@ export default function WalletStatusCard() {
 
         <div>
           <p className={ui.statLabel}>Network</p>
-          <p className="mt-2 font-sans text-lg font-semibold text-text-primary">
-            Base
-          </p>
+          <p className="mt-2 font-sans text-lg font-semibold text-white">Base</p>
         </div>
       </div>
 
-      <div className="mt-5 border-t border-glass-border pt-5 sm:mt-6">
+      <div className="mt-5 border-t border-white/10 pt-5 sm:mt-6">
         {isConnected ? (
           <button
             type="button"
@@ -57,6 +56,6 @@ export default function WalletStatusCard() {
           />
         )}
       </div>
-    </article>
+    </GlassPanel>
   );
 }

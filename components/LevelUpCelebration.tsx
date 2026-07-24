@@ -1,5 +1,5 @@
+import GlassPanel from "@/components/GlassPanel";
 import { useEffect } from "react";
-import { ui } from "@/lib/ui-styles";
 
 type LevelUpCelebrationProps = {
   level: number;
@@ -19,17 +19,17 @@ export default function LevelUpCelebration({
   }, [level, onDismiss]);
 
   return (
-    <article
+    <GlassPanel
       role="status"
       aria-live="polite"
-      className={`${ui.glassCard} border-base-blue/40 p-5 text-center shadow-[0_0_24px_rgba(0,82,255,0.25)] sm:p-6`}
+      className="border-cyan-300/30 p-5 text-center shadow-[0_0_28px_rgba(0,82,255,0.28)] sm:p-6"
     >
-      <p className="font-sans text-xl font-bold text-text-primary sm:text-2xl">
-        🎉 Level Up!
+      <p className="font-sans text-xl font-bold text-white sm:text-2xl">
+        Level Up!
       </p>
-      <p className="mt-2 text-sm text-text-secondary sm:text-base">
+      <p className="mt-2 text-sm text-white/60 sm:text-base">
         You reached Level {level}!
       </p>
-    </article>
+    </GlassPanel>
   );
 }

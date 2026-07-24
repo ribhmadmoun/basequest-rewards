@@ -1,21 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #070b18;
+  --foreground: #ffffff;
 
-  /* BaseQuest design tokens */
+  /* BaseQuest design tokens — aligned with Base Wallet Score */
   --base-blue: #0052ff;
-  --gradient-from: #0052ff;
-  --gradient-via: #0047e0;
-  --gradient-to: #0039b3;
-  --glass-bg: rgb(255 255 255 / 10%);
-  --glass-border: rgb(255 255 255 / 20%);
+  --gradient-from: #070b18;
+  --gradient-via: #0c1430;
+  --gradient-to: #101038;
+  --glass-bg: rgb(255 255 255 / 4%);
+  --glass-border: rgb(255 255 255 / 10%);
   --text-primary: #ffffff;
-  --text-secondary: rgb(255 255 255 / 90%);
-  --text-muted: rgb(255 255 255 / 75%);
+  --text-secondary: rgb(255 255 255 / 70%);
+  --text-muted: rgb(255 255 255 / 45%);
   --radius-card: 1rem;
   --radius-badge: 9999px;
+  --panel-from: #0c142e;
+  --panel-via: #12183a;
+  --panel-to: #151040;
 }
 
 @theme inline {
@@ -34,15 +37,11 @@
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
+  --color-panel-from: var(--panel-from);
+  --color-panel-via: var(--panel-via);
+  --color-panel-to: var(--panel-to);
   --radius-card: 1rem;
   --radius-badge: 9999px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
