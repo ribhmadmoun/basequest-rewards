@@ -97,7 +97,15 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("[x/login]", error);
     return NextResponse.json(
-      { error: "x_oauth_unavailable" },
+      {
+        error: error instanceof Error ? error.message : String(error),
+        stack:
+          process.env.NODE_ENV !== "production"
+            ? error instanceof Error
+              ? error.stack
+              : undefined
+            : undefined,
+      },
       { status: 500 },
     );
   }
