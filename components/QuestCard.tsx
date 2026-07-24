@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import DailyCheckInQuestButton from "@/components/DailyCheckInQuestButton";
+import FollowFarcasterQuestButton from "@/components/FollowFarcasterQuestButton";
 import FollowXQuestButton from "@/components/FollowXQuestButton";
 import GlassPanel from "@/components/GlassPanel";
 import type { QuestProgress } from "@/lib/quest-engine";
@@ -75,6 +76,7 @@ export default function QuestCard({
   const isActionable = status === "available";
   const isDailyCheckInQuest = questId === "daily-check-in";
   const isFollowXQuest = questId === "follow-x";
+  const isFollowFarcasterQuest = questId === "follow-farcaster";
 
   return (
     <GlassPanel interactive className="flex h-full flex-col p-5 sm:p-6">
@@ -119,6 +121,13 @@ export default function QuestCard({
           />
         ) : isFollowXQuest && onServerProgress ? (
           <FollowXQuestButton
+            status={status}
+            buttonClassName={getCtaButtonClassName(true)}
+            disabledClassName={getCtaButtonClassName(false)}
+            onCompleted={onServerProgress}
+          />
+        ) : isFollowFarcasterQuest && onServerProgress ? (
+          <FollowFarcasterQuestButton
             status={status}
             buttonClassName={getCtaButtonClassName(true)}
             disabledClassName={getCtaButtonClassName(false)}

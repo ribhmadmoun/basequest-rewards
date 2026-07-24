@@ -29,13 +29,17 @@ type CommunityQuestCardsProps = {
 
 /**
  * Community follow quests.
- * follow-x uses X OAuth + verify-follow; Farcaster remains link-only for now.
+ * follow-x uses X OAuth + verify-follow.
+ * follow-farcaster uses Neynar verify-follow for @hqc.
  */
 export default function CommunityQuestCards({
   quests,
   onFollowXCompleted,
 }: CommunityQuestCardsProps) {
   const followXQuest = quests.find((quest) => quest.id === "follow-x");
+  const followFarcasterQuest = quests.find(
+    (quest) => quest.id === "follow-farcaster",
+  );
 
   return (
     <>
@@ -62,20 +66,29 @@ export default function CommunityQuestCards({
           );
         }
 
-        return (
-          <QuestCard
-            key={quest.id}
-            questId={quest.id}
-            title={quest.title}
-            description={quest.description}
-            reward={`+${quest.rewardXp} XP`}
-            status="available"
-            ctaLabel={quest.ctaLabel}
-            frequencyLabel="One-Time"
-            icon={icon}
-            externalHref={quest.href}
-          />
-        );
+        if (quest.id === "follow-farcaster") {
+          const status: QuestStatus =
+            followFarcasterQuest?.status ?? "available";
+          const reward =
+            followFarcasterQuest?.reward ?? `+${quest.rewardXp} XP`;
+
+          return (
+            <QuestCard
+              key={quest.id}
+              questId={quest.id}
+              title={quest.title}
+              description={quest.description}
+              reward={reward}
+              status={status}
+              ctaLabel={quest.ctaLabel}
+              frequencyLabel="One-Time"
+              icon={icon}
+              onServerProgress={onFollowXCompleted}
+            />
+          );
+        }
+
+        return null;
       })}
     </>
   );

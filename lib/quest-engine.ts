@@ -3,7 +3,8 @@ export type QuestId =
   | "view-leaderboard"
   | "build-streak"
   | "explore-base"
-  | "follow-x";
+  | "follow-x"
+  | "follow-farcaster";
 
 const QUEST_IDS: QuestId[] = [
   "daily-check-in",
@@ -11,10 +12,14 @@ const QUEST_IDS: QuestId[] = [
   "build-streak",
   "explore-base",
   "follow-x",
+  "follow-farcaster",
 ];
 
 /** Quests shown in Community section (excluded from Builder lists). */
-export const COMMUNITY_ENGINE_QUEST_IDS: QuestId[] = ["follow-x"];
+export const COMMUNITY_ENGINE_QUEST_IDS: QuestId[] = [
+  "follow-x",
+  "follow-farcaster",
+];
 
 export function isCommunityEngineQuest(questId: QuestId): boolean {
   return COMMUNITY_ENGINE_QUEST_IDS.includes(questId);
@@ -82,6 +87,10 @@ const QUEST_ENGINE_METADATA: Record<
     prerequisites: [],
     ctaAvailable: "Connect X",
   },
+  "follow-farcaster": {
+    prerequisites: [],
+    ctaAvailable: "Follow @hqc",
+  },
 };
 
 export const QUEST_DEFINITIONS: QuestDefinition[] = [
@@ -123,6 +132,14 @@ export const QUEST_DEFINITIONS: QuestDefinition[] = [
       "Follow @bqrbase on X to stay updated with BaseQuest Rewards.",
     rewardXp: 25,
     ...QUEST_ENGINE_METADATA["follow-x"],
+  },
+  {
+    id: "follow-farcaster",
+    title: "Follow us on Farcaster",
+    description:
+      "Follow @hqc on Farcaster and join the BaseQuest community.",
+    rewardXp: 25,
+    ...QUEST_ENGINE_METADATA["follow-farcaster"],
   },
 ];
 

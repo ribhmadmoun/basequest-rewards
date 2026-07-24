@@ -35,10 +35,17 @@ export const COMMUNITY_QUESTS: CommunityQuestDefinition[] = [
     description:
       "Follow @hqc on Farcaster and join the BaseQuest community.",
     rewardXp: 25,
-    ctaLabel: "Follow on Farcaster",
-    href: "https://warpcast.com/hqc",
+    ctaLabel: "Follow @hqc",
+    href: "https://farcaster.xyz/hqc",
     icon: "farcaster",
     frequency: "one-time",
     category: "Community",
   },
 ];
+
+/** Target account for the Farcaster Follow community quest. */
+export const FARCASTER_FOLLOW_QUEST_TARGET = {
+  fid: 368591,
+  username: "hqc",
+  profileUrl: "https://farcaster.xyz/hqc",
+} as const;
